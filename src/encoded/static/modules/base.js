@@ -496,15 +496,67 @@ function base(exports, $, _, Backbone, HAL, assert, modal_template) {
             }, this));
         },
         render: function render() {
-            this.value = this.model.toJSON();
             addOverlay.__super__.render.apply(this, arguments);
             this.form = this.$('.modal-body').jsonForm({
                 schema: this.schema,
-                form: _.without(_.keys(this.schema.properties), '_uuid'),
-                value: this.value,
+                form: _.without(_.keys(this.schema.properties), '_uuid', 'accession'),
                 submitEvent: false,
                 onSubmitValid: _.bind(this.send, this)
             });
+
+            // Using this method because backbone.js doesn't attach elements until they are fully rendered
+            setTimeout(function() {
+                $(document).ready(function(){
+                    $("#" + document.getElementsByName("biosample_term")[0].id)
+                        .ajaxChosen(
+                            {
+                                minLength: 3,
+                                queryLimit: 10,
+                                delay: 100,
+                                chosenOptions: {},
+                                searchingText: "Searching...",
+                                noresultsText: "Leeno results.",
+                                initialQuery: false
+                            }, function (options, response, event) {
+                                var es = "http://localhost:6543/elasticsearch/";
+                                $.getJSON(es, {q: options.term}, function (data) {
+                                    var terms = {};
+                                    console.log(data);
+                                    $.each(data, function (i, val) {
+                                        terms[i] = val;
+                                    });
+                                    console.log(terms);
+                                    return response(terms);
+                                }
+                            );
+                        }
+                    );
+
+                    $("#" + document.getElementsByName("biosample_id")[0].id)
+                        .ajaxChosen({
+                            minLength: 3,
+                            queryLimit: 10,
+                            delay: 100,
+                            chosenOptions: {},
+                            searchingText: "Searching...",
+                            noresultsText: "No results.",
+                            initialQuery: false
+                        }, function (options, response, event) {
+                            var es = "http://localhost:6543/elasticsearch/";
+                            $.getJSON(es, {q: options.term}, function (data) {
+                                var terms = {};
+                                _.each(data.states, function (i, val) {
+                                    console.log(terms[i]);
+                                    terms[i] = val;
+                                });
+                            return terms;
+                        });
+                    });
+                    $("#" + document.getElementsByName("biosample_type")[0].id).chosen();
+                    $("#" + document.getElementsByName("species")[0].id).chosen();
+
+                });
+            }, 1);
             return this;
         },
         submit: function submit(evt) {
@@ -512,7 +564,15 @@ function base(exports, $, _, Backbone, HAL, assert, modal_template) {
         },
         send: function send(value)  {
             this.value = value;
-            // Essentially just $.ajax but triggering some events
+            this.value.lab_uuid = "72d5666a-a361-4f7b-ab66-a88e11280937";
+            this.value.accession = "ENCBS935ENC";
+            this.value.donor_uuid = "b432527c-0f19-4bc3-a810-e1bf583cfb38";
+            this.value.award_uuid= "2cda932c-07d5-4740-a024-d585635f5650";
+            this.value.submitter_uuid = "0598c868-0b4a-4c5b-9112-8f85c5de5374";
+            this.value.source_uuid = "82fc89e4-81a0-42af-b30e-fb5943b97b31";
+            this.value.document_uuids = [];
+            this.value.construct_uuids = [];
+            this.value.treatment_uuids = [];
             this.model.sync(null, this.model, {
                 url: this.action.href,
                 type: this.action.method,
@@ -520,14 +580,11 @@ function base(exports, $, _, Backbone, HAL, assert, modal_template) {
                 data: JSON.stringify(value),
                 dataType: 'json'
             }).done(_.bind(function (data) {
-                // close, refresh
                 console.log(data);
                 var url = data._links.items[0].href;
-                // force a refresh
                 app.view_registry.history.path = null;
                 app.view_registry.history.navigate(url, {trigger: true});
             }, this)).fail(_.bind(function (data) {
-                // flag errors, try again
                 console.log(data);
             }, this));
             return false;

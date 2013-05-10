@@ -132,6 +132,7 @@ def main(global_config, **settings):
     config.include('.edw_key')
     config.include('.persona')
     config.include('pyramid_multiauth')
+    config.include('.elasticsearch')
 
     config.include(static_resources)
 

@@ -314,12 +314,11 @@ class Collection(object):
         'actions': [
             {
                 'name': 'add',
-                'title': 'Add',
+                'title': 'Register {item_type}',
                 'profile': '/profiles/{item_type}.json',
                 'method': 'POST',
                 'href': '',
                 'templated': True,
-                'condition': 'permission:add',
             },
         ],
     }

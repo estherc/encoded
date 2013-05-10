@@ -33,6 +33,8 @@ requirejs.config({
         stickyheader: 'libs/sticky_header',
         table_filter: 'libs/jquery.table_filter',
         table_sorter: 'libs/table_sorter',
+        chosen: 'libs/chosen.jquery.min',
+        chosen_addition: 'libs/ajax-chosen.min'
     },
 
     shim: {
@@ -73,11 +75,19 @@ requirejs.config({
 
         underscore: {
             exports: '_'
+        },
+
+        chosen: {
+            deps: ['jquery']
+        },
+
+        chosen_addition: {
+            deps: ['jquery', 'chosen']
         }
     }
 });
 
-if (!window.TESTRUNNER) require(['jquery', 'app', 'bootstrap', 'modernizr', 'stickyheader', 'jsonform'],
+if (!window.TESTRUNNER) require(['jquery', 'app', 'bootstrap', 'modernizr', 'stickyheader', 'jsonform', 'chosen_addition'],
 function main($, app) {
 
     // Treat the jQuery ready function as the entry point to the application.
