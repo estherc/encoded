@@ -34,7 +34,7 @@ requirejs.config({
         table_filter: 'libs/jquery.table_filter',
         table_sorter: 'libs/table_sorter',
         chosen: 'libs/chosen.jquery.min',
-        chosen_addition: 'libs/ajax-chosen.min'
+        chosen_addition: 'libs/ajax-chosen'
     },
 
     shim: {
