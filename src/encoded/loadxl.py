@@ -270,11 +270,10 @@ def post_all(testapp, alldata, content_type):
                 nupdate += 1
                 del collection[uuid]
 
-
     logger.warn('Updated %d %s out of %d' % (nupdate, content_type, alldata['COUNTS'][content_type]))
 
     # now create whatever's left
-    post_collection(testapp, collection, url, alldata['COUNTS'][content_type]-nupdate)
+    post_collection(testapp, collection, url, alldata['COUNTS'][content_type] - nupdate)
 
 
 def post_collection(testapp, collection, url, count):
@@ -295,7 +294,8 @@ def post_collection(testapp, collection, url, count):
             if res.status_code == 422:
                 logger.warn('Error VALIDATING NEW %s %s: %r. Value:\n%r\n' % (url, uuid, res.json['errors'], value))
                 del collection[uuid]
-    es.refresh(index)
+    if index != 'biosamples':
+        es.refresh(index)
     logger.warn('Loaded NEW %d %s out of %d' % (nload, url, count))
 
 
