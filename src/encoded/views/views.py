@@ -27,6 +27,7 @@ class Lab(Collection):
              'repeat': 'award_uuid award_uuids'}
         ]
     }
+    item_embedded = set(['awards'])
 
 
 @root.location('awards')

@@ -55,6 +55,7 @@ class User(Collection):
                  'repeat': 'lab_uuid lab_uuids'}
             ]
         }
+        embedded = set(['labs'])
 
         def __acl__(self):
             owner = 'userid:%s' % self.model.rid
