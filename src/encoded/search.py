@@ -32,7 +32,6 @@ def getLabs(term):
     finalResults = {}
     for user_data in users_data:
         labs = user_data.get('_source')['lab_uuids']
-        print labs
         for lab in labs:
             lab_data = es.search('_uuid:' + lab, index=['labs'], doc_type=[DOCTYPE])
             results = lab_data.get('hits')['hits']
