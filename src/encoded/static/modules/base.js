@@ -497,8 +497,7 @@ function base(exports, $, _, Backbone, HAL, assert, modal_template) {
         },
         render: function render() {
             addOverlay.__super__.render.apply(this, arguments);
-            var url = "http://localhost:9200/search/labs"
-
+            var url = "http://localhost:9200/search/labs";
             this.form = this.$('.modal-body').jsonForm({
                 schema: this.schema,
                 form: _.without(_.keys(this.schema.properties), '_uuid', 'accession'),
@@ -509,34 +508,29 @@ function base(exports, $, _, Backbone, HAL, assert, modal_template) {
             setTimeout(function() {
                 $(document).ready(function(){
                     $("#" + document.getElementsByName("biosample_term")[0].id)
-                        .ajaxChosen(
-                            {
-                                minLength: 2,
-                                queryLimit: 100,
-                                delay: 100,
-                                chosenOptions: {'allow_single_deselect':'true'},
-                                searchingText: "Searching...",
-                                noresultsText: "No results.",
-                                initialQuery: false
-                            }, function (options, response, event) {
-                                var es = "http://localhost:6543/search";
-                                $.getJSON(es, {query: options.term, index: 'ontology'}, function (data) {
-                                    var terms = {};
-                                    $.each(data, function (i, val) {
-                                        terms[i] = val;
-                                    });
-                                    return response(terms);
-                                }
-                            );
-                        }
-                    );
-
+                        .ajaxChosen({
+                            minLength: 2,
+                            queryLimit: 100,
+                            delay: 100,
+                            chosenOptions: {'allow_single_deselect':'true'},
+                            searchingText: "Searching...",
+                            noresultsText: "No results.",
+                            initialQuery: false
+                        }, function (options, response, event) {
+                            var es = "http://localhost:6543/search";
+                            $.getJSON(es, {query: options.term, index: 'ontology'}, function (data) {
+                                var terms = {};
+                                $.each(data, function (i, val) {
+                                    terms[i] = val;
+                                });
+                                return response(terms);
+                            });
+                    });
                     // Populating labs using user details 
                     var id = document.getElementsByName("lab")[0].id;
                     $("#" + id).chosen();
-                    
                     var terms;
-                    var lab_uuid;
+                    var lab_uuids;
                     $.ajax({
                         async: false,
                         url: "/search",
@@ -545,31 +539,28 @@ function base(exports, $, _, Backbone, HAL, assert, modal_template) {
                         success:  function(labs) {
                             terms = labs;
                         }
-                    }); 
+                    });
                     _.each(terms, function(value, key) {
                         $("#"+id).append('<option value = '+ key +'>' + value + '</option>');
-                        lab_uuid = key;
-                    });    
+                        // Populating labs using user details 
+                        var awardId = document.getElementsByName("award")[0].id;
+                        $("#"+ awardId).chosen();
+                        var awards;
+                        $.ajax({
+                            async: false,
+                            url: "/search",
+                            dataType: "json",
+                            data: "query="+key+"&index=awards",
+                            success:  function(results) {
+                                awards = results;
+                            }
+                        });
+                        _.each(awards, function(value, key) {
+                            $("#"+ awardId).append('<option value = '+ key +'>' + value + '</option>');
+                        });
+                        $("#" + awardId).trigger("liszt:updated");
+                    });
                     $("#" + id).trigger("liszt:updated");
-
-                    // Populating labs using user details 
-                    var awardId = document.getElementsByName("award")[0].id;
-                    $("#"+ awardId).chosen();
-                    var awards;
-                    $.ajax({
-                        async: false,
-                        url: "/search",
-                        dataType: "json",
-                        data: "query="+lab_uuid+"&index=awards",
-                        success:  function(results) {
-                            awards = results;
-                        }
-                    }); 
-                    _.each(awards, function(value, key) {
-                        $("#"+ awardId).append('<option value = '+ key +'>' + value + '</option>');
-                    });    
-                    $("#" + awardId).trigger("liszt:updated");
-
                     $("#" + document.getElementsByName("biosample_type")[0].id).chosen();
                     $("#" + document.getElementsByName("species")[0].id).chosen();
                 });

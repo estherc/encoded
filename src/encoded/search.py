@@ -27,16 +27,18 @@ def getLabs(term):
     ''' return labs for user '''
 
     # This should rather be a nested query in Elastic Search
-    users = es.search('_uuid:' + term, index=['users'], doc_type=[DOCTYPE])
+    users = es.search('_uuid:' + term , index=['users'], doc_type=[DOCTYPE])
     users_data = users.get('hits')['hits']
     finalResults = {}
     for user_data in users_data:
         labs = user_data.get('_source')['lab_uuids']
+        print labs
         for lab in labs:
             lab_data = es.search('_uuid:' + lab, index=['labs'], doc_type=[DOCTYPE])
-            result = lab_data.get('hits')['hits']
-            source = result[0].get('_source')
-            finalResults[source['_uuid']] = source['name']
+            results = lab_data.get('hits')['hits']
+            for result in results:
+                source = result.get('_source')
+                finalResults[source['_uuid']] = source['name']
     return finalResults
 
 
