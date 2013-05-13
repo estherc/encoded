@@ -319,6 +319,7 @@ class Collection(object):
                 'method': 'POST',
                 'href': '',
                 'templated': True,
+                'condition': 'permission:add',
             },
         ],
     }

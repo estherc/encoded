@@ -1,5 +1,6 @@
 from PIL import Image
 from base64 import b64encode
+from pyelasticsearch import ElasticSearch
 import datetime
 import logging
 import mimetypes
@@ -9,6 +10,8 @@ import xlrd
 
 logger = logging.getLogger('encoded')
 logger.setLevel(logging.WARNING)  #doesn't work to shut off sqla INFO
+
+es = ElasticSearch('http://localhost:9200')
 
 TYPE_URL = {
     # TODO This has appears in 3 places... maybe it shoudl be configged
@@ -277,11 +280,14 @@ def post_all(testapp, alldata, content_type):
 def post_collection(testapp, collection, url, count):
 
     nload = 0
+    index = url.strip('/')
     for uuid, value in list(collection.iteritems()):
         value = dict((k, v) for k, v in value.iteritems() if v is not None)
         try:
             res = testapp.post_json(url, value, status=[201, 422])
             nload += 1
+            if index != 'biosamples':
+                es.index(index, 'basic', value, nload)
         except Exception as e:
             logger.warn('Error SUBMITTING NEW %s %s: %r. Value:\n%r\n' % (url, uuid, e, value))
             del collection[uuid]
@@ -289,6 +295,7 @@ def post_collection(testapp, collection, url, count):
             if res.status_code == 422:
                 logger.warn('Error VALIDATING NEW %s %s: %r. Value:\n%r\n' % (url, uuid, res.json['errors'], value))
                 del collection[uuid]
+    es.refresh(index)
     logger.warn('Loaded NEW %d %s out of %d' % (nload, url, count))
 
 

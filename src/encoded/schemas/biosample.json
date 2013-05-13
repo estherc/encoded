@@ -14,18 +14,24 @@
             "description": "",
             "type": "string"
         },
+        "lab": {
+            "title": "Lab",
+            "description": "",
+            "type": "string",
+            "enum": []
+        },
+        "award": {
+            "title": "Grant",
+            "description": "",
+            "type": "string",
+            "enum": []
+        },
         "biosample_term": {
             "title": "Biosample Term",
             "description": "",
             "type": "string",
             "enum": [
             ]
-        },
-        "biosample_id": {
-            "title": "Term ID",
-            "description": "",
-            "type": "string",
-            "enum": []
         },
         "biosample_type": {
             "title": "Biosample Type",
