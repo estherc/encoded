@@ -144,38 +144,28 @@ function biosamples(exports, $, _, base, table_sorter, table_filter, home_templa
                     // Populating labs using user details 
                     var id = document.getElementsByName("lab")[0].id;
                     $("#" + id).chosen();
-                    var terms;
-                    var lab_uuids;
+                    var awardId = document.getElementsByName("award")[0].id;
+                    $("#"+ awardId).chosen();
                     $.ajax({
                         async: false,
-                        url: "/search",
+                        url: "/current-user",
                         dataType: "json",
-                        data: "query=9b52a07a-e46f-4b74-bbe3-e5fd45b768e0&index=labs",
-                        success:  function(labs) {
-                            terms = labs;
+                        success:  function(user) {
+                           var resources = user['_embedded']['resources'];
+                           _.each(resources, function(resource) {
+                            var key = (resource['_links']['self']['href']).substr((resource['_links']['self']['href']).length - 36)
+                                if(resource['_links']['collection']['href'] == "/awards/") {
+
+                                    $("#"+ awardId).append('<option key = ' + key + '>' + resource['number'] + '</option>');
+                                }else {
+                                    console.log(resource);
+                                    $("#"+ id).append('<option key = ' + key + '>' + resource['name'] + '</option>');
+                                }
+                           });
                         }
                     });
-                    _.each(terms, function(value, key) {
-                        $("#"+id).append('<option value = '+ key +'>' + value + '</option>');
-                        // Populating labs using user details 
-                        var awardId = document.getElementsByName("award")[0].id;
-                        $("#"+ awardId).chosen();
-                        var awards;
-                        $.ajax({
-                            async: false,
-                            url: "/search",
-                            dataType: "json",
-                            data: "query="+key+"&index=awards",
-                            success:  function(results) {
-                                awards = results;
-                            }
-                        });
-                        _.each(awards, function(value, key) {
-                            $("#"+ awardId).append('<option value = '+ key +'>' + value + '</option>');
-                        });
-                        $("#" + awardId).trigger("liszt:updated");
-                    });
-                    $("#" + id).trigger("liszt:updated");
+                    $("#"+ id).trigger('liszt:updated');
+                    $("#"+ awardId).trigger('liszt:updated');
                     $("#" + document.getElementsByName("biosample_type")[0].id).chosen();
                     $("#" + document.getElementsByName("species")[0].id).chosen();
                 });
