@@ -1,70 +1,166 @@
 {
-    "title": "Biosample",
-    "description": "Biosamples used in Encode Project",
+    "title": "ENCODE Biosample",
+    "id": "/profiles/biosample.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "Schema for submitting an ENCODE Biosample",
     "type": "object",
+    "required": [ "award", "lab", "type", "donor", "source"],
     "properties": {
-        "_uuid": {
-            "title": "UUID",
-            "description": "",
-            "type": "string",
-            "format": "uuid"
-        },
-        "accession": {
-            "title": "Accession",
-            "description": "",
+        "description": {
+            "default": "",
+            "description": "A plain text description of the biosample",
+            "title": "Description",
             "type": "string"
         },
         "lab": {
+            "default": "ENCODE Project",
+            "description": "Lab submitting the biosample",
+            "comment": "Automatic submitters can supply a Lab UUID or Name",
             "title": "Lab",
-            "description": "",
             "type": "string",
-            "enum": []
+            "format": "lab_link",
+            "enum" : []
         },
         "award": {
-            "title": "Grant",
-            "description": "",
+            "default": "ENCODE",
+            "description": "Award (Grant) this submission is registered under",
+            "comment": "Automatic submitters can supply an Award UUID, name, or number",
+            "title": "Award Name",
             "type": "string",
+            "format": "award_link",
+            "enum" : []
+        },
+        "term_id": {
+            "default": "",
+            "description": "Ontology term ID describing biosample type",
+            "comment": "Valid ontologies for biosamples are: Uberon, EFO, BTO, or CL",
+            "title": "Ontology ID",
+            "type": "string",
+            "pattern": "(UBERON|EFO|BTO|CL):[0-9]+",
             "enum": []
         },
-        "biosample_term": {
-            "title": "Biosample Term",
-            "description": "",
-            "type": "string",
-            "enum": [
-            ]
+        "term_name": {
+            "default": "",
+            "description": "Ontology term describing biosample type",
+            "title": "Ontology Term",
+            "type":  "string",
+            "enum" : []
         },
-        "biosample_type": {
+        "type": {
+            "description": "The sub-type of the biosample",
             "title": "Biosample Type",
-            "description": "",
             "type": "string",
-            "enum": [
+            "enum" : [
                 "Primary cell line",
                 "Immortalized cell line",
                 "Tissue"
             ]
         },
-        "species": {
-            "title": "Species",
-            "description": "",
+        "donor": {
+            "description": "Donor reference for the Biosample",
+            "comment": "For automatic submission, supply a ENCODE donor accession or uuid",
+            "title": "Donor",
             "type": "string",
-            "enum": [
-                "Human",
-                "Rabbit",
-                "Rat",
-                "Mouse",
-                "Sheep",
-                "Goat"
-            ]
+            "format": "donor_link",
+            "enum": []
+        },
+        "source": {
+            "description": "Source or Vendor of Biomaterials",
+            "comment": "Automatic submitters can supply an ENCODE source UUID or unique Source name",
+            "title": "Biosample Source",
+            "type": "string",
+            "format": "source_link",
+            "enum": [] 
+        }, 
+        "passage_number": {
+            "default": null,
+            "description": "Cell culture passage number",
+            "title": "Passage Number",
+            "type": "integer"
+        },
+         "culture_harvest_date": {
+            "description": "Harvest date of cell culture",
+            "title": "Culture Harvest Date",
+            "type": "string",
+            "format": "date"
+        },
+        "culture_start_date": {
+            "description": "Start date of culture",
+            "title": "Culture Start Date",
+            "type":  "string",
+            "format": "date"
+        },
+        "date_obtained": {
+            "description": "Date sample obtained by lab",
+            "title": "Date Obtained",
+            "type": "string",
+            "format": "date"
+        },
+       "starting_amount": {
+            "description": "Starting amount of Biosample",
+            "title": "Starting Amount",
+            "type": "string"
+        },
+        "construct_list": {
+            "default": [],
+            "description": "List of construct object identifiers",
+            "comment": "For automatic submission this is a list of unique references to construct objects.",
+            "items": {
+                "description": "Transfection, fusion, or shRNA construct name or uuid",
+                "title": "Constructs",
+                "type":  "string",
+                "format": "construct_link"
+            },
+            "title": "List of Constructs",
+            "type": "array"
+        },
+        "treatment_list": {
+            "default": [],
+            "description": "List of treatments applied to biosample",
+            "comment": "For automatic submission supply unique treatment names or uuids",
+            "items": {
+                "description": "Substances used to treat a biosample",
+                "title": "Biosample Treatment",
+                "type": "string",
+                "format": "treatment_link"
+            },
+            "title": "Treatment List",
+            "type": "array"
+        },
+        "dbxref": {
+            "default": {},
+            "description": "List of Database (including Lab) cross-references",
+            "additionalProperties": {
+                "default": [],
+                "description": "List of Database IDs",
+                "title": "Database IDs",
+                "type":  "array",
+                "items": {
+                    "description": "",
+                    "title": "DB ID",
+                    "type": "string"
+                }
+            },
+            "title": "DBXREFs",
+            "type": "object"
+        },
+        "protocol_document_list": {
+            "default": [],
+            "description": "List of biosample protocols associated with this biosample",
+            "comment": "For automatic submission supply unique documents names or uuids",
+            "items": {
+                "description": "Protocol document",
+                "title": "Protocol Document",
+                "type": "string",
+                "format": "document_link"
+            },
+            "title": "Protocol Document List",
+            "type": "array"
         },
         "notes": {
+            "description": "User Notes",
             "title": "Notes",
-            "description": "",
-            "type": "string"
+            "type": "textarea"
         }
-    },
-    "required": [
-        "Term",
-        "biosample_type",
-        "species"
-    ]
+    }
 }

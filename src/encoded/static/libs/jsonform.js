@@ -190,9 +190,6 @@ jsonform.fieldTemplate = function(inner) {
       '<% if (node.prepend || node.append) { %>' +
         '</div>' +
       '<% } %>' +
-      '<% if (node.description) { %>' +
-        '<span class="help-inline"><%= node.description %></span>' +
-      '<% } %>' +
       '<span class="help-block jsonform-errortext" style="display:none;"></span>' +
     '</div></div>';
 };
@@ -238,7 +235,7 @@ jsonform.elementTypes = {
   },
   'textarea':{
     'template':'<textarea id="<%= id %>" name="<%= node.name %>" ' +
-      'style="height:<%= elt.height || "150px" %>;width:<%= elt.width || "100%" %>;"' +
+      'style="height:<%= elt.height || "150px" %>;width:<%= elt.width || "80%" %>;"' +
       '<%= (node.disabled? " disabled" : "")%>' +
       '><%= value %></textarea>',
     'fieldtemplate': true,

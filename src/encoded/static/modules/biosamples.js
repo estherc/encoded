@@ -111,17 +111,19 @@ function biosamples(exports, $, _, base, table_sorter, table_filter, home_templa
         },
         render: function render() {
             biosampleAddOverlay.__super__.render.apply(this, arguments);
-            var url = "http://localhost:9200/search/labs";
             this.form = this.$('.modal-body').jsonForm({
                 schema: this.schema,
-                form: _.without(_.keys(this.schema.properties), '_uuid', 'accession'),
+                form: _.without(_.keys(this.schema.properties), 'term_id', 'passage_number',
+                    'culture_harvest_date', 'culture_start_date', 'date_obtained', 'starting_amount',
+                    'construct_list', 'treatment_list', 'protocol_document_list', 'dbxref',
+                    'related_biosample_list'),
                 submitEvent: false,
                 onSubmitValid: _.bind(this.send, this)
             });
 
             setTimeout(function() {
                 $(document).ready(function(){
-                    $("#" + document.getElementsByName("biosample_term")[0].id)
+                    $("#" + document.getElementsByName("term_name")[0].id)
                         .ajaxChosen({
                             type: "GET",
                             url: "/search",
@@ -134,11 +136,10 @@ function biosamples(exports, $, _, base, table_sorter, table_filter, home_templa
                             chosenOptions: {'allow_single_deselect':'true'},
                             searchingText: "Searching...",
                             noresultsText: "No results.",
-                            initialQuery: 'skin'
+                            initialQuery: false
                         }, function (data) {
-                            return _.map(data, function (text) {
-                                var value = text;
-                                return {value: value, text: text};
+                            return _.map(data, function (value, key) {
+                                return {value: key + ',' + value , text: value + ' (' + key + ')'};
                             });
                     });
                     // Populating labs using user details 
@@ -153,21 +154,42 @@ function biosamples(exports, $, _, base, table_sorter, table_filter, home_templa
                         success:  function(user) {
                            var resources = user['_embedded']['resources'];
                            _.each(resources, function(resource) {
-                            var key = (resource['_links']['self']['href']).substr((resource['_links']['self']['href']).length - 36)
+                                var key = (resource['_links']['self']['href']).substr((resource['_links']['self']['href']).length - 36);
                                 if(resource['_links']['collection']['href'] == "/awards/") {
-
-                                    $("#"+ awardId).append('<option key = ' + key + '>' + resource['number'] + '</option>');
+                                    $("#"+ awardId).append('<option value = ' + key + '>' + resource['number'] + '</option>');
                                 }else {
-                                    console.log(resource);
-                                    $("#"+ id).append('<option key = ' + key + '>' + resource['name'] + '</option>');
+                                    $("#"+ id).append('<option value = ' + key + '>' + resource['name'] + '</option>');
                                 }
                            });
                         }
                     });
                     $("#"+ id).trigger('liszt:updated');
                     $("#"+ awardId).trigger('liszt:updated');
-                    $("#" + document.getElementsByName("biosample_type")[0].id).chosen();
-                    $("#" + document.getElementsByName("species")[0].id).chosen();
+                    $("#" + document.getElementsByName("type")[0].id).chosen();
+                    $("#" + document.getElementsByName("donor")[0].id)
+                        .ajaxChosen({
+                                type: "GET",
+                                url: "/search",
+                                jsonTermKey: "query",
+                                data: {index: 'donor'},
+                                dataType: "json"
+                            }, function (data) {
+                                return _.map(data, function (value, key) {
+                                    return {value: key, text: value};
+                                });
+                        });
+                    $("#" + document.getElementsByName("source")[0].id)
+                        .ajaxChosen({
+                                type: "GET",
+                                url: "/search",
+                                jsonTermKey: "query",
+                                data: {index: 'source'},
+                                dataType: "json"
+                            }, function (data) {
+                                return _.map(data, function (value, key) {
+                                    return {value: key, text: value};
+                                });
+                        });
                 });
             }, 1);
             return this;
@@ -177,15 +199,9 @@ function biosamples(exports, $, _, base, table_sorter, table_filter, home_templa
         },
         send: function send(value)  {
             this.value = value;
-            this.value.lab_uuid = "72d5666a-a361-4f7b-ab66-a88e11280937";
-            this.value.accession = "ENCBS935ENC";
-            this.value.donor_uuid = "b432527c-0f19-4bc3-a810-e1bf583cfb38";
-            this.value.award_uuid= "2cda932c-07d5-4740-a024-d585635f5650";
-            this.value.submitter_uuid = "0598c868-0b4a-4c5b-9112-8f85c5de5374";
-            this.value.source_uuid = "82fc89e4-81a0-42af-b30e-fb5943b97b31";
-            this.value.document_uuids = [];
-            this.value.construct_uuids = [];
-            this.value.treatment_uuids = [];
+            var terms = value['term_name'].split(',');
+            this.value.term_name = terms[1];
+            this.value.term_id = terms[0];
             this.model.sync(null, this.model, {
                 url: this.action.href,
                 type: this.action.method,
