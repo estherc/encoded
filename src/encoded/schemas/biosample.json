@@ -12,7 +12,7 @@
             "title": "Description",
             "type": "string"
         },
-        "lab": {
+        "lab_uuid": {
             "default": "ENCODE Project",
             "description": "Lab submitting the biosample",
             "comment": "Automatic submitters can supply a Lab UUID or Name",
@@ -21,7 +21,7 @@
             "format": "lab_link",
             "enum" : []
         },
-        "award": {
+        "award_uuid": {
             "default": "ENCODE",
             "description": "Award (Grant) this submission is registered under",
             "comment": "Automatic submitters can supply an Award UUID, name, or number",
@@ -30,7 +30,7 @@
             "format": "award_link",
             "enum" : []
         },
-        "term_id": {
+        "biosample_term_id": {
             "default": "",
             "description": "Ontology term ID describing biosample type",
             "comment": "Valid ontologies for biosamples are: Uberon, EFO, BTO, or CL",
@@ -39,14 +39,14 @@
             "pattern": "(UBERON|EFO|BTO|CL):[0-9]+",
             "enum": []
         },
-        "term_name": {
+        "biosample_term_name": {
             "default": "",
             "description": "Ontology term describing biosample type",
             "title": "Ontology Term",
             "type":  "string",
             "enum" : []
         },
-        "type": {
+        "biosample_type": {
             "description": "The sub-type of the biosample",
             "title": "Biosample Type",
             "type": "string",
@@ -56,7 +56,7 @@
                 "Tissue"
             ]
         },
-        "donor": {
+        "donor_uuid": {
             "description": "Donor reference for the Biosample",
             "comment": "For automatic submission, supply a ENCODE donor accession or uuid",
             "title": "Donor",
@@ -64,7 +64,7 @@
             "format": "donor_link",
             "enum": []
         },
-        "source": {
+        "source_uuid": {
             "description": "Source or Vendor of Biomaterials",
             "comment": "Automatic submitters can supply an ENCODE source UUID or unique Source name",
             "title": "Biosample Source",
@@ -101,7 +101,7 @@
             "title": "Starting Amount",
             "type": "string"
         },
-        "construct_list": {
+        "construct_uuids": {
             "default": [],
             "description": "List of construct object identifiers",
             "comment": "For automatic submission this is a list of unique references to construct objects.",
@@ -114,7 +114,7 @@
             "title": "List of Constructs",
             "type": "array"
         },
-        "treatment_list": {
+        "treatment_uuids": {
             "default": [],
             "description": "List of treatments applied to biosample",
             "comment": "For automatic submission supply unique treatment names or uuids",
@@ -144,7 +144,7 @@
             "title": "DBXREFs",
             "type": "object"
         },
-        "protocol_document_list": {
+        "document_uuids": {
             "default": [],
             "description": "List of biosample protocols associated with this biosample",
             "comment": "For automatic submission supply unique documents names or uuids",

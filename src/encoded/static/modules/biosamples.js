@@ -113,9 +113,9 @@ function biosamples(exports, $, _, base, table_sorter, table_filter, home_templa
             biosampleAddOverlay.__super__.render.apply(this, arguments);
             this.form = this.$('.modal-body').jsonForm({
                 schema: this.schema,
-                form: _.without(_.keys(this.schema.properties), 'term_id', 'passage_number',
+                form: _.without(_.keys(this.schema.properties), 'biosample_term_id', 'passage_number',
                     'culture_harvest_date', 'culture_start_date', 'date_obtained', 'starting_amount',
-                    'construct_list', 'treatment_list', 'protocol_document_list', 'dbxref',
+                    'construct_uuids', 'treatment_uuids', 'document_uuids', 'dbxref',
                     'related_biosample_list'),
                 submitEvent: false,
                 onSubmitValid: _.bind(this.send, this)
@@ -123,7 +123,7 @@ function biosamples(exports, $, _, base, table_sorter, table_filter, home_templa
 
             setTimeout(function() {
                 $(document).ready(function(){
-                    $("#" + document.getElementsByName("term_name")[0].id)
+                    $("#" + document.getElementsByName("biosample_term_name")[0].id)
                         .ajaxChosen({
                             type: "GET",
                             url: "/search",
@@ -143,9 +143,9 @@ function biosamples(exports, $, _, base, table_sorter, table_filter, home_templa
                             });
                     });
                     // Populating labs using user details 
-                    var id = document.getElementsByName("lab")[0].id;
+                    var id = document.getElementsByName("lab_uuid")[0].id;
                     $("#" + id).chosen();
-                    var awardId = document.getElementsByName("award")[0].id;
+                    var awardId = document.getElementsByName("award_uuid")[0].id;
                     $("#"+ awardId).chosen();
                     $.ajax({
                         async: false,
@@ -165,8 +165,8 @@ function biosamples(exports, $, _, base, table_sorter, table_filter, home_templa
                     });
                     $("#"+ id).trigger('liszt:updated');
                     $("#"+ awardId).trigger('liszt:updated');
-                    $("#" + document.getElementsByName("type")[0].id).chosen();
-                    $("#" + document.getElementsByName("donor")[0].id)
+                    $("#" + document.getElementsByName("biosample_type")[0].id).chosen();
+                    $("#" + document.getElementsByName("donor_uuid")[0].id)
                         .ajaxChosen({
                                 type: "GET",
                                 url: "/search",
@@ -178,7 +178,7 @@ function biosamples(exports, $, _, base, table_sorter, table_filter, home_templa
                                     return {value: key, text: value};
                                 });
                         });
-                    $("#" + document.getElementsByName("source")[0].id)
+                    $("#" + document.getElementsByName("source_uuid")[0].id)
                         .ajaxChosen({
                                 type: "GET",
                                 url: "/search",
@@ -198,10 +198,35 @@ function biosamples(exports, $, _, base, table_sorter, table_filter, home_templa
             this.form.submit(evt);
         },
         send: function send(value)  {
+
             this.value = value;
-            var terms = value['term_name'].split(',');
-            this.value.term_name = terms[1];
-            this.value.term_id = terms[0];
+            var terms = value['biosample_term_name'].split(',');
+            this.value.biosample_term_name = terms[1];
+            this.value.biosample_term_id = terms[0];
+            var accession_uuid;
+            $.ajax({
+                async: false,
+                url: "/generate_accession",
+                dataType: "json",
+                success:  function(accession) {
+                   accession_uuid = accession;
+                }
+            });
+            this.value.accession  = accession_uuid;
+            this.value.related_biosample_uuid = '';
+            this.value.construct_uuids = [];
+            this.value.treatment_uuids = [];
+            this.value.document_uuids  = [];
+            var submitter;
+            $.ajax({
+                async: false,
+                url: "/current-user",
+                dataType: "json",
+                success:  function(user) {
+                   submitter = (user['_links']['self']['href']).substr((user['_links']['self']['href']).length - 36);
+                }
+            });
+            this.value.submitter_uuid = submitter;
             this.model.sync(null, this.model, {
                 url: this.action.href,
                 type: this.action.method,
@@ -209,13 +234,17 @@ function biosamples(exports, $, _, base, table_sorter, table_filter, home_templa
                 data: JSON.stringify(value),
                 dataType: 'json'
             }).done(_.bind(function (data) {
+                // close, refresh
                 console.log(data);
                 var url = data._links.items[0].href;
+                // force a refresh
                 app.view_registry.history.path = null;
                 app.view_registry.history.navigate(url, {trigger: true});
             }, this)).fail(_.bind(function (data) {
+                // flag errors, try again
                 console.log(data);
             }, this));
+            // Stop event propogation
             return false;
         }
     }, {
