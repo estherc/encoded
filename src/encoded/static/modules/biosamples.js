@@ -248,7 +248,7 @@ function biosamples(exports, $, _, base, table_sorter, table_filter, home_templa
             return false;
         }
     }, {
-        route_name: 'add',
+        route_name: 'add-biosample',
         model_factory: function model_factory(attrs, options) {
             return app.view_registry.current_views.content.model;
         }

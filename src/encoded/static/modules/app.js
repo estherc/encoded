@@ -53,7 +53,7 @@ function app(exports, $, _, Backbone, base, home, antibodies, biosamples, target
 
     var overlay_routes = {
         edit: ['edit'],
-        add:['add']
+        'add-biosample': ['add-biosample']
     };
 
     var slots = {

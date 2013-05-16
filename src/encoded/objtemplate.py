@@ -62,7 +62,7 @@ def dict_template(template, namespace):
     repeat = template.get('repeat', _marker)
     if repeat is not _marker:
         repeat_name, repeater = repeat.split()
-        for repeat_value in namespace[repeater]:
+        for repeat_value in namespace.get(repeater, []):
             repeat_namespace = namespace.copy()
             repeat_namespace[repeat_name] = repeat_value
             result = type(template)()

@@ -134,6 +134,11 @@ class Biosample(Collection):
         'title': 'Biosamples',
         'description': 'Biosamples used in the ENCODE project',
     }
+    links = {
+        'actions': [
+            {'name': 'add-biosample', 'title': 'Register Biosample', 'profile': '/profiles/{item_type}.json', 'method': 'POST', 'href': '', 'templated': True, 'condition': 'permission:add'},
+        ],
+    }
     item_links = {
         'submitter': {'href': '/users/{submitter_uuid}', 'templated': True},
         'source': {'href': '/sources/{source_uuid}', 'templated': True},
