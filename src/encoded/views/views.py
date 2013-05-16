@@ -224,7 +224,7 @@ class Platform(Collection):
 
 
 @root.location('libraries')
-class Library(Collection):
+class Libraries(Collection):
     properties = {
         'title': 'Libraries',
         'description': 'Listing of Libraries',
@@ -279,6 +279,11 @@ class Experiments(Collection):
     properties = {
         'title': 'Experiments',
         'description': 'Listing of Experiments',
+    }
+    links = {
+        'actions': [
+            {'name': 'add-experiment', 'title': 'Register Experiment', 'profile': '/profiles/experiment.json', 'method': 'POST', 'href': '', 'templated': True, 'condition': 'permission:add'},
+        ],
     }
     item_links = {
         'submitter': {'href': '/users/{submitter_uuid}', 'templated': True},
