@@ -19,6 +19,7 @@
             "title": "Lab",
             "type": "string",
             "format": "lab_link",
+            "required": true,
             "enum" : []
         },
         "award_uuid": {
@@ -28,6 +29,7 @@
             "title": "Award Name",
             "type": "string",
             "format": "award_link",
+            "required": true,
             "enum" : []
         },
         "biosample_term_id": {
@@ -37,6 +39,7 @@
             "title": "Ontology ID",
             "type": "string",
             "pattern": "(UBERON|EFO|BTO|CL):[0-9]+",
+            "required": true,
             "enum": []
         },
         "biosample_term_name": {
@@ -44,6 +47,7 @@
             "description": "Ontology term describing biosample type",
             "title": "Ontology Term",
             "type":  "string",
+            "required": true,
             "enum" : []
         },
         "biosample_type": {
@@ -54,7 +58,8 @@
                 "Primary cell line",
                 "Immortalized cell line",
                 "Tissue"
-            ]
+            ],
+            "required": true
         },
         "donor_uuid": {
             "description": "Donor reference for the Biosample",

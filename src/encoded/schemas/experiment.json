@@ -13,7 +13,8 @@
             "title": "Lab",
             "type": "string",
             "format": "lab_link",
-            "enum" : []
+            "enum" : [],
+            "required": true
         },
         "award_uuid": {
             "default": "ENCODE",
@@ -22,13 +23,15 @@
             "title": "Award Name",
             "type": "string",
             "format": "award_link",
-            "enum" : []
+            "enum" : [],
+            "required": true
         },
         "description": {
             "default": "",
             "description": "A plain text description of the biosample",
             "title": "Description",
-            "type": "string"
+            "type": "string",
+            "required": true
         }
     }
 }

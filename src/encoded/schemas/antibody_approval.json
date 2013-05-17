@@ -1,74 +1,54 @@
 {
-    "default": null,
-    "description": "",
+    "title": "ENCODE Antibody",
+    "id": "/profiles/antibody_approval.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "Schema for submitting an ENCODE Antibody",
+    "type": "object",
+    "required": [],
     "properties": {
-        "antibody_lot_uuid": {
-            "default": null,
-            "description": "",
-            "title": "",
-            "type": [
-                "string",
-                "null"
-            ]
+        "target_uuid": {
+            "default": "",
+            "description": "target of the antibody",
+            "title": "Target",
+            "type": "string",
+            "enum":[],
+            "required": true
         },
         "approval_status": {
-            "default": null,
-            "description": "",
-            "title": "",
-            "type": [
-                "string",
-                "null"
-            ]
+            "default": "",
+            "description": "target of the antibody",
+            "title": "Target",
+            "type": "string",
+            "enum":[
+                "APPROVED",
+                "FAILED",
+                "SUBMITTED",
+                "INCOMPLETE",
+                "UNSUBMITTED"
+            ],
+            "required": true
         },
-        "project": {
-            "default": null,
-            "description": "",
-            "title": "",
-            "type": [
-                "string",
-                "null"
-            ]
+        "organism_uuid": {
+            "default": "",
+            "description": "species",
+            "title": "Species",
+            "type": "string",
+            "enum":[
+                "Human",
+                "Rabbit",
+                "Rat",
+                "Mouse",
+                "Sheep",
+                "Goat"
+            ],
+            "required": true
         },
-        "target_uuid": {
-            "default": null,
-            "description": "",
-            "title": "",
-            "type": [
-                "string",
-                "null"
-            ]
-        },
-        "ucsc alias for cricket reference": {
-            "default": null,
-            "description": "",
-            "title": "",
-            "type": [
-                "string",
-                "null"
-            ]
-        },
-        "validation_uuids": {
-            "default": null,
-            "description": "",
-            "items": {
-                "default": null,
-                "description": "",
-                "title": "",
-                "type": [
-                    "string",
-                    "null"
-                ]
-            },
-            "title": "",
-            "type": [
-                "array",
-                "null"
-            ]
+        "validation_file": {
+            "default": "",
+            "description": "validation file for the antibody",
+            "title": "Validation File",
+            "type": "file",
+            "required": true
         }
-    },
-    "title": "",
-    "type": [
-        "object",
-        "null"
-    ]
+    }
 }

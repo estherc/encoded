@@ -101,5 +101,80 @@ function antibodies(exports, $, _, base, table_sorter, table_filter, home_templa
         model_factory: exports.antibody_factory
     });
 
-     return exports;
+    var antibodyAddOverlay = exports.antibodyAddOverlay = base.Modal.extend({
+        tagName: 'form',
+        events: {'submit': 'submit'},
+        className: base.Modal.prototype.className + ' form-horizontal',
+        initialize: function initialize(options) {
+            var name = options.route_args[0];
+            this.action = _.find(this.model._links.actions, function(item) {
+                return item.name === name;
+            });
+            this.title = this.action.title;
+            this.deferred = $.get(this.action.profile);
+            this.deferred.done(_.bind(function (data) {
+                this.schema = data;
+            }, this));
+        },
+        render: function render() {
+            antibodyAddOverlay.__super__.render.apply(this, arguments);
+            this.form = this.$('.modal-body').jsonForm({
+                schema: this.schema,
+                form: _.without(_.keys(this.schema.properties), ''),
+                submitEvent: false,
+                onSubmitValid: _.bind(this.send, this)
+            });
+            setTimeout(function() {
+                var targetId = document.getElementsByName("target_uuid")[0].id;
+                var speciesId = document.getElementsByName("organism_uuid")[0].id;
+                var statusId = document.getElementsByName("approval_status")[0].id;
+                $("#" + targetId).chosen();
+                $("#" + speciesId).chosen();
+                $("#" + statusId).chosen();
+            }, 1);
+            return this;
+        },
+        submit: function submit(evt) {
+            this.form.submit(evt);
+        },
+        send: function send(value)  {
+            this.value = value;
+            var accession_uuid;
+            $.ajax({
+                async: false,
+                url: "/generate_accession",
+                dataType: "json",
+                success:  function(accession) {
+                   accession_uuid = accession;
+                }
+            });
+            this.value.accession  = accession_uuid;
+            this.model.sync(null, this.model, {
+                url: this.action.href,
+                type: this.action.method,
+                contentType: 'application/json',
+                data: JSON.stringify(value),
+                dataType: 'json'
+            }).done(_.bind(function (data) {
+                // close, refresh
+                console.log(data);
+                var url = data._links.items[0].href;
+                // force a refresh
+                app.view_registry.history.path = null;
+                app.view_registry.history.navigate(url, {trigger: true});
+            }, this)).fail(_.bind(function (data) {
+                // flag errors, try again
+                console.log(data);
+            }, this));
+            // Stop event propogation
+            return false;
+        }
+    }, {
+        route_name: 'add-antibody',
+        model_factory: function model_factory(attrs, options) {
+            return app.view_registry.current_views.content.model;
+        }
+    });
+
+    return exports;
 });

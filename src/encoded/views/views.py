@@ -205,6 +205,11 @@ class AntibodyApproval(Collection):
         'title': 'Antibody Approvals',
         'description': 'Listing of validation approvals for ENCODE antibodies',
     }
+    links = {
+        'actions': [
+            {'name': 'add-antibody', 'title': 'Register Antibody', 'profile': '/profiles/antibody_approval.json', 'method': 'POST', 'href': '', 'templated': True, 'condition': 'permission:add'},
+        ],
+    }
     item_links = {
         'antibody_lot': {'href': '/antibody-lots/{antibody_lot_uuid}', 'templated': True},
         'target': {'href': '/targets/{target_uuid}', 'templated': True},
