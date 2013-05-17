@@ -1,13 +1,19 @@
 # See http://docs.pylonsproject.org/projects/pyramid/en/latest/narr/resources.html
 
+import venusian
 from pyramid.events import (
     ContextFound,
     subscriber,
 )
 from pyramid.httpexceptions import (
+    HTTPConflict,
     HTTPForbidden,
     HTTPInternalServerError,
     HTTPNotFound,
+)
+from pyramid.interfaces import (
+    PHASE1_CONFIG,
+    PHASE2_CONFIG,
 )
 from pyramid.location import lineage
 from pyramid.security import (
@@ -22,6 +28,8 @@ from pyramid.threadlocal import (
     manager,
 )
 from pyramid.view import view_config
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm.exc import FlushError
 from urllib import unquote
 from uuid import (
     UUID,
@@ -33,12 +41,19 @@ from .storage import (
     DBSession,
     CurrentStatement,
     Resource,
+    Key,
 )
+LOCATION_ROOT = __name__ + ':location_root'
 _marker = object()
 
 
 def includeme(config):
     config.scan(__name__)
+    config.set_root_factory(root_factory)
+
+
+def root_factory(request):
+    return request.registry[LOCATION_ROOT]
 
 
 def make_subrequest(request, path):
@@ -164,35 +179,81 @@ def acl_from_settings(settings):
     return acl
 
 
+def uncamel(string):
+    """ CamelCase -> camel_case
+    """
+    out = ''
+    before = ''
+    for char in string:
+        if char.isupper() and before.isalnum() and not before.isupper():
+            out += '_'
+        out += char.lower()
+        before = char
+    return out
+
+
+def location_root(factory):
+    """ Set the location root
+    """
+
+    def set_root(config, factory):
+        acl = acl_from_settings(config.registry.settings)
+        root = factory(acl)
+        config.registry[LOCATION_ROOT] = root
+
+    def callback(scanner, factory_name, factory):
+        scanner.config.action(('location_root',), set_root,
+                              args=(scanner.config, factory),
+                              order=PHASE1_CONFIG)
+    venusian.attach(factory, callback, category='pyramid')
+
+    return factory
+
+
+def location(name, factory=None):
+    """ Attach a collection at the location ``name``.
+
+    Use as a decorator on Collection subclasses.
+    """
+
+    def set_location(config, name, factory):
+        root = config.registry[LOCATION_ROOT]
+        root.attach(name, factory)
+
+    def decorate(factory):
+        def callback(scanner, factory_name, factory):
+            scanner.config.action(('location', name), set_location,
+                                  args=(scanner.config, name, factory),
+                                  order=PHASE2_CONFIG)
+        venusian.attach(factory, callback, category='pyramid')
+        return factory
+
+    return decorate
+
+
 class Root(object):
     __name__ = ''
     __parent__ = None
 
-    def __init__(self, **properties):
-        self.properties = properties
+    def __init__(self, acl=None):
+        if acl is not None:
+            self.__acl__ = acl
         self.collections = {}
         self.by_item_type = {}
-
-    def __call__(self, request):
-        return self
 
     def __getitem__(self, name):
         return self.collections[name]
 
+    def __setitem__(self, name, value):
+        self.collections[name] = value
+        self.by_item_type[value.item_type] = value
+
+    def attach(self, name, factory):
+        value = factory(self, name)
+        self[name] = value
+
     def __json__(self, request=None):
         return self.properties.copy()
-
-    def location(self, name):
-        """ Attach a collection at the location ``name``.
-
-        Use as a decorator on Collection subclasses.
-        """
-        def decorate(factory):
-            collection = factory(self, name)
-            self.collections[name] = collection
-            self.by_item_type[collection.item_type] = collection
-            return factory
-        return decorate
 
 
 class MergedLinksMeta(type):
@@ -205,10 +266,18 @@ class MergedLinksMeta(type):
             links = vars(cls).get('links', None)
             if links is not None:
                 self.merged_links.update(links)
+        self.merged_keys = []
+        for cls in reversed(self.mro()):
+            for key in vars(cls).get('keys', []):
+                if isinstance(key, basestring):
+                    key = {'name': '{item_type}:' + key,
+                           'value': '{%s}' % key, 'templated': True}
+                self.merged_keys.append(key)
 
 
 class Item(object):
     __metaclass__ = MergedLinksMeta
+    keys = []
     embedded = {}
     links = {
         'self': {'href': '{collection_uri}{_uuid}', 'templated': True},
@@ -226,19 +295,26 @@ class Item(object):
         return self.model.statement.object
 
     def __json__(self, request):
+        links = self.expand_links(request)
+        if links is None:
+            return self.properties
         properties = self.properties.copy()
-        links = self.expand_links(properties, request)
-        if links is not None:
-            properties['_links'] = links
+        properties['_links'] = links
         return properties
 
-    def expand_links(self, properties, request):
+    def template_namespace(self, request=None):
         # Expand templated links
-        ns = properties.copy()
-        ns['collection_uri'] = request.resource_path(self.__parent__)
+        ns = self.properties.copy()
         ns['item_type'] = self.model.predicate
         ns['_uuid'] = self.model.rid
-        ns['permission'] = permission_checker(self, request)
+        if request is not None:
+            ns['collection_uri'] = request.resource_path(self.__parent__)
+            ns['permission'] = permission_checker(self, request)
+        return ns
+
+    def expand_links(self, request):
+        # Expand templated links
+        ns = self.template_namespace(request)
         compiled = ObjectTemplate(self.merged_links)
         links = compiled(ns)
         # Embed resources
@@ -253,6 +329,15 @@ class Item(object):
                 embed(request, value['href'])
         return links
 
+    def create_keys(self):
+        session = DBSession()
+        ns = self.template_namespace()
+        compiled = ObjectTemplate(self.merged_keys)
+        keys = compiled(ns)
+        for key_spec in keys:
+            key = Key(rid=self.model.rid, **key_spec)
+            session.add(key)
+
     @classmethod
     def create(cls, parent, uuid, properties, sheets=None):
         item_type = parent.item_type
@@ -266,7 +351,36 @@ class Item(object):
         session.add(resource)
         model = resource.data[item_type]
         item = cls(parent, model)
+        item.create_keys()
+        try:
+            session.flush()
+        except (IntegrityError, FlushError):
+            raise HTTPConflict()
         return item
+
+    def update_keys(self):
+        session = DBSession()
+        ns = self.template_namespace()
+        compiled = ObjectTemplate(self.merged_keys)
+        _keys = [(key['name'], key['value']) for key in compiled(ns)]
+        keys = set(_keys)
+        assert len(keys) == len(_keys)
+
+        existing = {
+            (key.name, key.value)
+            for key in self.model.resource.unique_keys
+        }
+
+        to_remove = existing - keys
+        to_add = keys - existing
+
+        for pk in to_remove:
+            key = session.query(Key).get(pk)
+            session.delete(key)
+
+        for name, value in to_add:
+            key = Key(rid=self.model.rid, name=name, value=value)
+            session.add(key)
 
     def update(self, properties, sheets=None):
         if properties is not None:
@@ -274,6 +388,12 @@ class Item(object):
         if sheets is not None:
             for key, value in sheets.items():
                 self.model.resource[key] = value
+        self.update_keys()
+        session = DBSession()
+        try:
+            session.flush()
+        except (IntegrityError, FlushError):
+            raise HTTPConflict()
 
 
 class CustomItemMeta(MergedLinksMeta):
@@ -285,11 +405,12 @@ class CustomItemMeta(MergedLinksMeta):
 
         # XXX Remove this, too magical.
         if self.item_type is None and 'item_type' not in attrs:
-            self.item_type = self.__name__.lower()
+            self.item_type = uncamel(self.__name__)
 
         if 'Item' in attrs:
             assert 'item_links' not in attrs
             assert 'item_embedded' not in attrs
+            assert 'item_keys' not in attrs
             return
         item_bases = tuple(base.Item for base in bases
                            if issubclass(base, Collection))
@@ -303,6 +424,8 @@ class CustomItemMeta(MergedLinksMeta):
             item_attrs['links'] = attrs['item_links']
         if 'item_embedded' in attrs:
             item_attrs['embedded'] = attrs['item_embedded']
+        if 'item_keys' in attrs:
+            item_attrs['keys'] = attrs['item_keys']
         self.Item = type('Item', item_bases, item_attrs)
 
 

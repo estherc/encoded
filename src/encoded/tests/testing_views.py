@@ -1,8 +1,8 @@
 from pyramid.view import view_config
 from ..contentbase import (
     Collection,
+    location,
 )
-from ..views import root
 from ..views.download import ItemWithDocument
 
 
@@ -22,7 +22,7 @@ def user(request):
     }
 
 
-@root.location('testing-downloads')
+@location('testing-downloads')
 class TestingDownload(Collection):
     properties = {
         'title': 'Test download collection',
@@ -31,3 +31,16 @@ class TestingDownload(Collection):
 
     class Item(ItemWithDocument):
         pass
+
+
+@location('testing-keys')
+class TestingKey(Collection):
+    properties = {
+        'title': 'Test keys',
+        'description': 'Testing. Testing. 1, 2, 3.',
+    }
+
+    item_keys = [
+        'name',
+        {'name': 'testing_accession', 'value': '{accession}', 'templated': True},
+    ]

@@ -4,17 +4,17 @@
 #    Deny,
 #    Everyone,
 #)
-from . import root
 from .download import ItemWithDocument
 from ..contentbase import (
     Collection,
+    location
 )
 from ..schema_utils import (
     load_schema,
 )
 
 
-@root.location('labs')
+@location('labs')
 class Lab(Collection):
     schema = load_schema('lab.json')
     properties = {
@@ -30,16 +30,17 @@ class Lab(Collection):
     item_embedded = set(['awards'])
 
 
-@root.location('awards')
+@location('awards')
 class Award(Collection):
     schema = load_schema('award.json')
     properties = {
         'title': 'Awards (Grants)',
         'description': 'Listing of awards (aka grants)',
     }
+    #item_keys = ['name'] should this be unique
 
 
-@root.location('antibody-lots')
+@location('antibody-lots')
 class AntibodyLots(Collection):
     #schema = load_schema('antibody_lot.json')
     properties = {
@@ -50,9 +51,13 @@ class AntibodyLots(Collection):
         'source': {'href': '/sources/{source_uuid}', 'templated': True},
     }
     item_embedded = set(['source'])
+    item_keys = [
+        {'name': 'accession', 'value': '{antibody_accession}', 'templated': True},
+        {'name': '{item_type}:source_product_lot', 'value': '{source_uuid}/{product_id}/{lot_id}', 'templated': True},
+    ]
 
 
-@root.location('organisms')
+@location('organisms')
 class Organism(Collection):
     schema = load_schema('organism.json')
     properties = {
@@ -62,7 +67,7 @@ class Organism(Collection):
     }
 
 
-@root.location('sources')
+@location('sources')
 class Source(Collection):
     schema = load_schema('source.json')
     properties = {
@@ -76,8 +81,7 @@ class Source(Collection):
     }
 
 
-
-@root.location('donors')
+@location('donors')
 class Donor(Collection):
     ## schema = load_schema('donor.json') Doesn't exist yet
     properties = {
@@ -88,18 +92,20 @@ class Donor(Collection):
         'organism': {'href': '/organisms/{organism_uuid}', 'templated': True},
     }
     item_embedded = set(['organism'])
+    item_keys = ['donor_id']
 
 
-@root.location('treatments')
+@location('treatments')
 class Treatment(Collection):
     ## schema = load_schema('treatment.json') Doesn't exist yet
     properties = {
         'title': 'Treatments',
         'description': 'Listing Biosample Treatments',
     }
+    item_keys = ['treatment_name']
 
 
-@root.location('constructs')
+@location('constructs')
 class Construct(Collection):
     properties = {
         'title': 'Constructs',
@@ -109,9 +115,10 @@ class Construct(Collection):
         'source': {'href': '/sources/{source_uuid}', 'templated': True},
     }
     item_embedded = set(['source'])
+    item_keys = ['vector_name']
 
 
-@root.location('documents')
+@location('documents')
 class Document(Collection):
     properties = {
         'title': 'Documents',
@@ -119,6 +126,7 @@ class Document(Collection):
     }
 
     class Item(ItemWithDocument):
+        keys = ['document_name']
         links = {
             'submitter': {'href': '/users/{submitter_uuid}', 'templated': True},
             'lab': {'href': '/labs/{lab_uuid}', 'templated': True},
@@ -127,7 +135,7 @@ class Document(Collection):
         embedded = set(['submitter', 'lab', 'award'])
 
 
-@root.location('biosamples')
+@location('biosamples')
 class Biosample(Collection):
     #schema = load_schema('biosample.json')
     properties = {
@@ -159,9 +167,10 @@ class Biosample(Collection):
         ],
     }
     item_embedded = set(['donor', 'submitter', 'lab', 'award', 'source', 'treatments', 'constructs'])
+    item_keys = [{'name': 'accession', 'value': '{accession}', 'templated': True}]
 
 
-@root.location('targets')
+@location('targets')
 class Target(Collection):
     #schema = load_schema('target.json')
     properties = {
@@ -175,10 +184,11 @@ class Target(Collection):
         'award': {'href': '/awards/{award_uuid}', 'templated': True},
     }
     item_embedded = set(['organism', 'submitter', 'lab', 'award'])
+    #   item_keys = [('target_label', 'organism_name')] multi columns not implemented yet
 
 
 # The following should really be child collections.
-@root.location('validations')
+@location('validations')
 class Validation(Collection):
     #schema = load_schema('validation.json')
     properties = {
@@ -197,7 +207,7 @@ class Validation(Collection):
         embedded = set(['antibody_lot', 'target', 'submitter', 'lab', 'award'])
 
 
-@root.location('antibodies')
+@location('antibodies')
 class AntibodyApproval(Collection):
     #schema = load_schema('antibody_approval.json')
     item_type = 'antibody_approval'
@@ -220,7 +230,7 @@ class AntibodyApproval(Collection):
     item_embedded = set(['antibody_lot', 'target'])
 
 
-@root.location('platforms')
+@location('platforms')
 class Platform(Collection):
     properties = {
         'title': 'Platforms',
@@ -228,7 +238,7 @@ class Platform(Collection):
     }
 
 
-@root.location('libraries')
+@location('libraries')
 class Libraries(Collection):
     properties = {
         'title': 'Libraries',
@@ -241,9 +251,10 @@ class Libraries(Collection):
         ],
     }
     item_embedded = set(['biosample'])
+    item_keys = [{'name': 'accession', 'value': '{accession}', 'templated': True}]
 
 
-@root.location('assays')
+@location('assays')
 class Assays(Collection):
     properties = {
         'title': 'Assays',
@@ -251,7 +262,7 @@ class Assays(Collection):
     }
 
 
-@root.location('replicates')
+@location('replicates')
 class Replicates(Collection):
     properties = {
         'title': 'Replicates',
@@ -265,7 +276,7 @@ class Replicates(Collection):
     item_embedded = set(['library', 'platform', 'assay'])
 
 
-@root.location('files')
+@location('files')
 class Files(Collection):
     properties = {
         'title': 'Files',
@@ -279,7 +290,7 @@ class Files(Collection):
     item_embedded = set(['submitter', 'lab', 'award'])
 
 
-@root.location('experiments')
+@location('experiments')
 class Experiments(Collection):
     properties = {
         'title': 'Experiments',
@@ -302,3 +313,4 @@ class Experiments(Collection):
         ],
     }
     item_embedded = set(['files', 'replicates', 'submitter', 'lab', 'award'])
+    item_keys = [{'name': 'accession', 'value': '{dataset_accession}', 'templated': True}]

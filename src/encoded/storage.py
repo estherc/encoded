@@ -94,6 +94,24 @@ class JSON(types.TypeDecorator):
         return value
 
 
+class Key(Base):
+    ''' indexed unique tables for accessions and other unique keys
+    '''
+    __tablename__ = 'keys'
+
+    # typically the field that is unique, i.e. accession
+    # might be prefixed with a namespace for per predicate unique values
+    name = Column(types.String, primary_key=True)
+    # the unique value
+    value = Column(types.String, primary_key=True)
+
+    rid = Column(UUID, ForeignKey('resources.rid'),
+                 nullable=False, index=True)
+
+    # Be explicit about dependencies to the ORM layer
+    resource = orm.relationship('Resource', backref='unique_keys')
+
+
 class Statement(Base):
     '''A triple describing a resource
     '''
@@ -137,6 +155,7 @@ class CurrentStatement(Base):
     )
     history = orm.relationship(
         'Statement', order_by=Statement.sid,
+        post_update=True,  # Break cyclic dependency
         primaryjoin="""and_(CurrentStatement.rid==Statement.rid,
                     CurrentStatement.predicate==Statement.predicate)""",
     )
