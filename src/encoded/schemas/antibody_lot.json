@@ -1,202 +1,76 @@
 {
-    "title": "", 
-    "description": "", 
-    "default": null, 
-    "type": [
-        "object", 
-        "null"
-    ], 
+    "title": "ENCODE Antibody",
+    "id": "/profiles/antibody_approval.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "Schema for submitting an ENCODE Antibody",
+    "type": "object",
+    "required": [],
     "properties": {
-        "antibody_accession": {
-            "title": "", 
-            "description": "", 
-            "default": null, 
-            "type": [
-                "string", 
-                "null"
-            ]
-        }, 
-        "antibody_description": {
-            "title": "", 
-            "description": "", 
-            "default": null, 
-            "type": [
-                "string", 
-                "null"
-            ]
-        }, 
-        "antigen_description": {
-            "title": "", 
-            "description": "", 
-            "default": null, 
-            "type": [
-                "string", 
-                "null"
-            ]
-        }, 
-        "antigen_sequence": {
-            "title": "", 
-            "description": "", 
-            "default": null, 
-            "type": [
-                "string", 
-                "null"
-            ]
+        "product_id": {
+            "default": "",
+            "description": "product id of the antibody",
+            "title": "Product ID",
+            "type": "string",
+            "required": true
+        },
+        "lot_id": {
+            "default": "",
+            "description": "lot id of the antibody",
+            "title": "Lot ID",
+            "type": "string",
+            "required": true
+        },
+        "source_uuid": {
+            "description": "Source or Vendor of Biomaterials",
+            "comment": "Automatic submitters can supply an ENCODE source UUID or unique Source name",
+            "title": "Source",
+            "type": "string",
+            "format": "source_link",
+            "enum": [] 
         }, 
         "clonality": {
-            "title": "", 
-            "description": "", 
-            "default": null, 
-            "type": [
-                "string", 
-                "null"
-            ]
-        }, 
-        "dbxref": {
-            "title": "", 
-            "description": "", 
-            "default": null, 
-            "items": {
-                "title": "", 
-                "description": "", 
-                "default": null, 
-                "type": [
-                    "object", 
-                    "null"
-                ], 
-                "properties": {
-                    "db": {
-                        "title": "", 
-                        "description": "", 
-                        "default": null, 
-                        "type": [
-                            "string", 
-                            "null"
-                        ]
-                    }, 
-                    "id": {
-                        "title": "", 
-                        "description": "", 
-                        "default": null, 
-                        "type": [
-                            "string", 
-                            "null"
-                        ]
-                    }
-                }
-            }, 
-            "type": [
-                "array", 
-                "null"
-            ]
-        }, 
-        "host_organism": {
-            "title": "", 
-            "description": "", 
-            "default": null, 
-            "type": [
-                "string", 
-                "null"
-            ]
-        }, 
-        "is_obsolete": {
-            "title": "", 
-            "description": "", 
-            "default": null, 
-            "type": [
-                "string", 
-                "null"
-            ]
-        }, 
-        "isotype": {
-            "title": "", 
-            "description": "", 
-            "default": null, 
-            "type": [
-                "string", 
-                "null"
-            ]
-        }, 
-        "lot_id": {
-            "title": "", 
-            "description": "", 
-            "default": null, 
-            "type": [
-                "string", 
-                "null"
-            ]
-        }, 
-        "product_id": {
-            "title": "", 
-            "description": "", 
-            "default": null, 
-            "type": [
-                "string", 
-                "null"
-            ]
-        }, 
+            "default": "",
+            "description": "clonality of the antibody",
+            "title": "Clonality",
+            "type": "string",
+            "required": true
+        },
+        "organism_uuid": {
+            "default": "",
+            "description": "species",
+            "title": "Species",
+            "type": "string",
+            "enum":[
+                "Human",
+                "Rabbit",
+                "Rat",
+                "Mouse",
+                "Sheep",
+                "Goat"
+            ],
+            "required": true
+        },
+        "iso_type": {
+            "default": "",
+            "description": "Iso Type of the antibody",
+            "title": "ISO Type",
+            "type": "string",
+            "required": true
+        },
         "purification": {
-            "title": "", 
-            "description": "", 
-            "default": null, 
-            "type": [
-                "string", 
-                "null"
-            ]
-        }, 
-        "source_uuid": {
-            "title": "", 
-            "description": "", 
-            "default": null, 
-            "type": [
-                "string", 
-                "null"
-            ]
-        }, 
-        "submittd_by": {
-            "title": "", 
-            "description": "", 
-            "default": null, 
-            "type": [
-                "string", 
-                "null"
-            ]
-        }, 
-        "submitted_by_grant": {
-            "title": "", 
-            "description": "", 
-            "default": null, 
-            "type": [
-                "string", 
-                "null"
-            ]
-        }, 
-        "submitted_by_pi": {
-            "title": "", 
-            "description": "", 
-            "default": null, 
-            "type": [
-                "string", 
-                "null"
-            ]
-        }, 
-        "target_label": {
-            "title": "", 
-            "description": "", 
-            "default": null, 
-            "type": [
-                "string", 
-                "null"
-            ]
-        }, 
-        "url": {
-            "title": "", 
-            "description": "", 
-            "default": null, 
-            "type": [
-                "string", 
-                "null"
-            ]
+            "default": "",
+            "description": "Purification of the antibody",
+            "title": "Purification",
+            "type": "string",
+            "required": true
+        },
+        "target_uuid": {
+            "default": "",
+            "description": "target of the antibody",
+            "title": "Target",
+            "type": "string",
+            "enum":[],
+            "required": true
         }
     }
 }

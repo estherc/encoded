@@ -6,12 +6,46 @@
     "type": "object",
     "required": [ "award", "lab", "type", "donor", "source"],
     "properties": {
-        "description": {
-            "default": "",
-            "description": "A plain text description of the biosample",
-            "title": "Description",
-            "type": "string"
+        "biosample_type": {
+            "description": "The sub-type of the biosample",
+            "title": "Biosample Type",
+            "type": "string",
+            "enum" : [
+                "Primary cell line",
+                "Immortalized cell line",
+                "Tissue"
+            ],
+            "required": true
         },
+        "biosample_term_name": {
+            "default": "",
+            "description": "Ontology term describing biosample type",
+            "title": "Biosample Term Name",
+            "type":  "string",
+            "required": true,
+            "enum" : []
+        },
+        "notes": {
+            "description": "User Notes",
+            "title": "Notes",
+            "type": "textarea"
+        },
+        "donor_uuid": {
+            "description": "Donor reference for the Biosample",
+            "comment": "For automatic submission, supply a ENCODE donor accession or uuid",
+            "title": "Donor",
+            "type": "string",
+            "format": "donor_link",
+            "enum": []
+        },
+        "source_uuid": {
+            "description": "Source or Vendor of Biomaterials",
+            "comment": "Automatic submitters can supply an ENCODE source UUID or unique Source name",
+            "title": "Source",
+            "type": "string",
+            "format": "source_link",
+            "enum": [] 
+        }, 
         "lab_uuid": {
             "default": "ENCODE Project",
             "description": "Lab submitting the biosample",
@@ -32,6 +66,12 @@
             "required": true,
             "enum" : []
         },
+        "description": {
+            "default": "",
+            "description": "A plain text description of the biosample",
+            "title": "Description",
+            "type": "string"
+        },
         "biosample_term_id": {
             "default": "",
             "description": "Ontology term ID describing biosample type",
@@ -42,41 +82,6 @@
             "required": true,
             "enum": []
         },
-        "biosample_term_name": {
-            "default": "",
-            "description": "Ontology term describing biosample type",
-            "title": "Ontology Term",
-            "type":  "string",
-            "required": true,
-            "enum" : []
-        },
-        "biosample_type": {
-            "description": "The sub-type of the biosample",
-            "title": "Biosample Type",
-            "type": "string",
-            "enum" : [
-                "Primary cell line",
-                "Immortalized cell line",
-                "Tissue"
-            ],
-            "required": true
-        },
-        "donor_uuid": {
-            "description": "Donor reference for the Biosample",
-            "comment": "For automatic submission, supply a ENCODE donor accession or uuid",
-            "title": "Donor",
-            "type": "string",
-            "format": "donor_link",
-            "enum": []
-        },
-        "source_uuid": {
-            "description": "Source or Vendor of Biomaterials",
-            "comment": "Automatic submitters can supply an ENCODE source UUID or unique Source name",
-            "title": "Biosample Source",
-            "type": "string",
-            "format": "source_link",
-            "enum": [] 
-        }, 
         "passage_number": {
             "default": null,
             "description": "Cell culture passage number",
@@ -161,11 +166,6 @@
             },
             "title": "Protocol Document List",
             "type": "array"
-        },
-        "notes": {
-            "description": "User Notes",
-            "title": "Notes",
-            "type": "textarea"
         }
     }
 }

@@ -127,10 +127,10 @@ function antibodies(exports, $, _, base, table_sorter, table_filter, home_templa
             setTimeout(function() {
                 var targetId = document.getElementsByName("target_uuid")[0].id;
                 var speciesId = document.getElementsByName("organism_uuid")[0].id;
-                var statusId = document.getElementsByName("approval_status")[0].id;
+                var sourceId = document.getElementsByName("source_uuid")[0].id;
                 $("#" + targetId).chosen();
                 $("#" + speciesId).chosen();
-                $("#" + statusId).chosen();
+                $("#" + sourceId).chosen();
             }, 1);
             return this;
         },

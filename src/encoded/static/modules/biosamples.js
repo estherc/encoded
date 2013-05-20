@@ -116,7 +116,7 @@ function biosamples(exports, $, _, base, table_sorter, table_filter, home_templa
                 form: _.without(_.keys(this.schema.properties), 'biosample_term_id', 'passage_number',
                     'culture_harvest_date', 'culture_start_date', 'date_obtained', 'starting_amount',
                     'construct_uuids', 'treatment_uuids', 'document_uuids', 'dbxref',
-                    'related_biosample_list'),
+                    'related_biosample_list', 'description'),
                 submitEvent: false,
                 onSubmitValid: _.bind(this.send, this)
             });

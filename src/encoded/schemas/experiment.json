@@ -6,6 +6,15 @@
     "type": "object",
     "required": ["lab_uuid", "award_uuid", "description"],
     "properties": {
+        "assay_type": {
+            "default": "",
+            "description": "Assay Type of the experiment",
+            "comment": "Assay Type",
+            "title": "Assay Type",
+            "type": "string",
+            "enum" : [],
+            "required": true
+        },
         "lab_uuid": {
             "default": "ENCODE Project",
             "description": "Lab submitting the experiment",

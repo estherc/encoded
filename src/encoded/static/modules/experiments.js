@@ -77,6 +77,8 @@ function experiments(exports, $, _, base, table_sorter, table_filter, home_templ
             setTimeout(function() {
                 $(document).ready(function(){
                     // Populating labs using user details 
+                    var assayId = document.getElementsByName("assay_type")[0].id;
+                    $("#"+ assayId).chosen();
                     var id = document.getElementsByName("lab_uuid")[0].id;
                     $("#" + id).chosen();
                     var awardId = document.getElementsByName("award_uuid")[0].id;
