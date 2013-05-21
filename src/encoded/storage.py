@@ -112,6 +112,23 @@ class Key(Base):
     resource = orm.relationship('Resource', backref='unique_keys')
 
 
+class Link(Base):
+    """ indexed relations
+    """
+    __tablename__ = 'links'
+    source_rid = Column(
+        'source', UUID, ForeignKey('resources.rid'), primary_key=True)
+    rel = Column(types.String, primary_key=True)
+    target_rid = Column(
+        'target', UUID, ForeignKey('resources.rid'), primary_key=True,
+        index=True)  # Single column index for reverse lookup
+
+    source = orm.relationship(
+        'Resource', foreign_keys=[source_rid], backref='rels')
+    target = orm.relationship(
+        'Resource', foreign_keys=[target_rid], backref='revs')
+
+
 class Statement(Base):
     '''A triple describing a resource
     '''
@@ -207,28 +224,6 @@ class TransactionRecord(Base):
     data = Column(JSON)
     timestamp = Column(
         types.DateTime, nullable=False, server_default=func.now())
-
-
-class UserMap(Base):
-    __tablename__ = 'user_map'
-    # e.g. mailto:test@example.com
-    login = Column(types.Text, primary_key=True)
-    userid = Column(UUID, ForeignKey('resources.rid'), nullable=False)
-
-    resource = orm.relationship('Resource', lazy='joined',
-                                foreign_keys=[userid])
-
-    user = orm.relationship(
-        'CurrentStatement', lazy='joined', foreign_keys=[userid],
-        primaryjoin="""and_(CurrentStatement.rid==UserMap.userid,
-                       CurrentStatement.predicate=='user')""",
-    )
-
-    # might have to be deferred
-
-    def __init__(self, login, userid):
-        self.login = login
-        self.userid = userid
 
 
 class EDWKey(Base):

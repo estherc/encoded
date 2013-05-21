@@ -166,30 +166,8 @@ function biosamples(exports, $, _, base, table_sorter, table_filter, home_templa
                     $("#"+ id).trigger('liszt:updated');
                     $("#"+ awardId).trigger('liszt:updated');
                     $("#" + document.getElementsByName("biosample_type")[0].id).chosen();
-                    $("#" + document.getElementsByName("donor_uuid")[0].id)
-                        .ajaxChosen({
-                                type: "GET",
-                                url: "/search",
-                                jsonTermKey: "query",
-                                data: {index: 'donor'},
-                                dataType: "json"
-                            }, function (data) {
-                                return _.map(data, function (value, key) {
-                                    return {value: key, text: value};
-                                });
-                        });
-                    $("#" + document.getElementsByName("source_uuid")[0].id)
-                        .ajaxChosen({
-                                type: "GET",
-                                url: "/search",
-                                jsonTermKey: "query",
-                                data: {index: 'source'},
-                                dataType: "json"
-                            }, function (data) {
-                                return _.map(data, function (value, key) {
-                                    return {value: key, text: value};
-                                });
-                        });
+                    $("#" + document.getElementsByName("donor_uuid")[0].id).chosen();
+                    $("#" + document.getElementsByName("source_uuid")[0].id).chosen();
                 });
             }, 1);
             return this;
