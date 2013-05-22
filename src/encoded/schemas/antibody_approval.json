@@ -6,29 +6,38 @@
     "type": "object",
     "required": [],
     "properties": {
-        "target_uuid": {
+        "antibody_product_id": {
             "default": "",
-            "description": "target of the antibody",
-            "title": "Target",
+            "description": "product id of the antibody",
+            "title": "Product ID",
             "type": "string",
-            "enum":[],
+            "enum": [],
             "required": true
         },
-        "approval_status": {
+        "antibody_lot_id": {
             "default": "",
-            "description": "target of the antibody",
-            "title": "Target",
+            "description": "lot id of the antibody",
+            "title": "Lot ID",
             "type": "string",
-            "enum":[
-                "APPROVED",
-                "FAILED",
-                "SUBMITTED",
-                "INCOMPLETE",
-                "UNSUBMITTED"
-            ],
+            "enum": [],
             "required": true
         },
-        "organism_uuid": {
+        "source_uuid": {
+            "description": "Source or Vendor of Biomaterials",
+            "comment": "Automatic submitters can supply an ENCODE source UUID or unique Source name",
+            "title": "Source",
+            "type": "string",
+            "format": "source_link",
+            "enum": [] 
+        }, 
+        "clonality": {
+            "default": "",
+            "description": "clonality of the antibody",
+            "title": "Clonality",
+            "type": "string",
+            "required": true
+        },
+        "host_organism": {
             "default": "",
             "description": "species",
             "title": "Species",
@@ -43,11 +52,26 @@
             ],
             "required": true
         },
-        "validation_file": {
+        "iso_type": {
             "default": "",
-            "description": "validation file for the antibody",
-            "title": "Validation File",
-            "type": "file",
+            "description": "Iso Type of the antibody",
+            "title": "ISO Type",
+            "type": "string",
+            "required": true
+        },
+        "purification": {
+            "default": "",
+            "description": "Purification of the antibody",
+            "title": "Purification",
+            "type": "string",
+            "required": true
+        },
+        "target_uuid": {
+            "default": "",
+            "description": "target of the antibody",
+            "title": "Target",
+            "type": "string",
+            "enum":[],
             "required": true
         }
     }

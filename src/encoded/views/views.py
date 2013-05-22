@@ -217,7 +217,7 @@ class AntibodyApproval(Collection):
     }
     links = {
         'actions': [
-            {'name': 'add-antibody', 'title': 'Register Antibody', 'profile': '/profiles/antibody_lot.json', 'method': 'POST', 'href': '', 'templated': True, 'condition': 'permission:add'},
+            {'name': 'add-antibody', 'title': 'Register Antibody', 'profile': '/profiles/antibody_approval.json', 'method': 'POST', 'href': '', 'templated': True, 'condition': 'permission:add'},
         ],
     }
     item_links = {

@@ -49,12 +49,14 @@
                         <span id="submitter" class="data-point">{model.links.submitter.get('first_name')} {model.links.submitter.get('last_name')}</span>
                     </div>
                 </div>
+                <?js if(properties.project) {?>
                 <div class="data-group">
                     <label class="data-label" for="project">Project:</label>
                     <div class="data-values">
                         <span id="project" class="data-point">{properties.project}</span>
                     </div>
                 </div>
+                <?js } ?>
                 <?js if(model.links.replicates.length) { ?>
                 <?js if(model.links.replicates[0].get('antibody_accession')) {?>
                 <div class="data-group">

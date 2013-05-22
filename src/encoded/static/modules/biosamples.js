@@ -142,7 +142,7 @@ function biosamples(exports, $, _, base, table_sorter, table_filter, home_templa
                                 return {value: key + ',' + value , text: value + ' (' + key + ')'};
                             });
                     });
-                    // Populating labs using user details 
+                    // Populating labs using labs, awards, sourc and donors using user details 
                     var id = document.getElementsByName("lab_uuid")[0].id;
                     $("#" + id).chosen();
                     var awardId = document.getElementsByName("award_uuid")[0].id;
@@ -152,22 +152,63 @@ function biosamples(exports, $, _, base, table_sorter, table_filter, home_templa
                         url: "/current-user",
                         dataType: "json",
                         success:  function(user) {
-                           var resources = user['_embedded']['resources'];
-                           _.each(resources, function(resource) {
-                                var key = (resource['_links']['self']['href']).substr((resource['_links']['self']['href']).length - 36);
-                                if(resource['_links']['collection']['href'] == "/awards/") {
-                                    $("#"+ awardId).append('<option value = ' + key + '>' + resource['number'] + '</option>');
-                                }else {
-                                    $("#"+ id).append('<option value = ' + key + '>' + resource['name'] + '</option>');
-                                }
-                           });
+                            var labs = user['_links']['labs'];
+                            _.each(labs, function(lab) {
+                                var labId = lab['href'].substr(lab['href'].length - 36);
+                                $.ajax({
+                                    async: false,
+                                    url: "/get_data",
+                                    dataType: "json",
+                                    data: {collection: 'lab', id: labId},
+                                    success:  function(labs) {
+                                        _.each(labs, function(value, key) {
+                                            $("#" + id).append('<option value = ' + key + '>' + value + '</option>');
+                                        });
+                                    }
+                                });
+                                $.ajax({
+                                    async: false,
+                                    url: "/get_data",
+                                    dataType: "json",
+                                    data: {collection: 'award', id: labId},
+                                    success:  function(awards) {
+                                        _.each(awards, function(value, key) {
+                                            $("#" + awardId).append('<option value = ' + key + '>' + value + '</option>');
+                                        });
+                                   }
+                                });
+                            });
                         }
                     });
                     $("#"+ id).trigger('liszt:updated');
                     $("#"+ awardId).trigger('liszt:updated');
                     $("#" + document.getElementsByName("biosample_type")[0].id).chosen();
                     $("#" + document.getElementsByName("donor_uuid")[0].id).chosen();
+                    $.ajax({
+                        async: false,
+                        url: "/get_data",
+                        dataType: "json",
+                        data: {collection: 'donor'},
+                        success:  function(donors) {
+                            _.each(donors, function(value, key) {
+                                $("#" + document.getElementsByName("donor_uuid")[0].id).append('<option value = ' + key + '>' + value + '</option>');
+                            });
+                       }
+                    });
+                    $("#"+ document.getElementsByName("donor_uuid")[0].id).trigger('liszt:updated');
                     $("#" + document.getElementsByName("source_uuid")[0].id).chosen();
+                    $.ajax({
+                        async: false,
+                        url: "/get_data",
+                        dataType: "json",
+                        data: {collection: 'source'},
+                        success:  function(sources) {
+                            _.each(sources, function(value, key) {
+                                $("#" + document.getElementsByName("source_uuid")[0].id).append('<option value = ' + key + '>' + value + '</option>');
+                            });
+                       }
+                    });
+                    $("#"+ document.getElementsByName("source_uuid")[0].id).trigger('liszt:updated');
                 });
             }, 1);
             return this;

@@ -35,7 +35,7 @@
             "type": "string",
             "required": true
         },
-        "organism_uuid": {
+        "host_organism": {
             "default": "",
             "description": "species",
             "title": "Species",

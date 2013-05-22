@@ -88,15 +88,32 @@ function experiments(exports, $, _, base, table_sorter, table_filter, home_templ
                         url: "/current-user",
                         dataType: "json",
                         success:  function(user) {
-                           var resources = user['_embedded']['resources'];
-                           _.each(resources, function(resource) {
-                                var key = (resource['_links']['self']['href']).substr((resource['_links']['self']['href']).length - 36);
-                                if(resource['_links']['collection']['href'] == "/awards/") {
-                                    $("#"+ awardId).append('<option value = ' + key + '>' + resource['number'] + '</option>');
-                                }else {
-                                    $("#"+ id).append('<option value = ' + key + '>' + resource['name'] + '</option>');
-                                }
-                           });
+                            var labs = user['_links']['labs'];
+                            _.each(labs, function(lab) {
+                                var labId = lab['href'].substr(lab['href'].length - 36);
+                                $.ajax({
+                                    async: false,
+                                    url: "/get_data",
+                                    dataType: "json",
+                                    data: {collection: 'lab', id: labId},
+                                    success:  function(labs) {
+                                        _.each(labs, function(value, key) {
+                                            $("#" + id).append('<option value = ' + key + '>' + value + '</option>');
+                                        });
+                                    }
+                                });
+                                $.ajax({
+                                    async: false,
+                                    url: "/get_data",
+                                    dataType: "json",
+                                    data: {collection: 'award', id: labId},
+                                    success:  function(awards) {
+                                        _.each(awards, function(value, key) {
+                                            $("#" + awardId).append('<option value = ' + key + '>' + value + '</option>');
+                                        });
+                                   }
+                                });
+                            });
                         }
                     });
                     $("#"+ id).trigger('liszt:updated');
@@ -119,7 +136,7 @@ function experiments(exports, $, _, base, table_sorter, table_filter, home_templ
                    accession_uuid = accession;
                 }
             });
-            this.value.accession  = accession_uuid;
+            this.value.dataset_accession  = accession_uuid;
             var submitter;
             $.ajax({
                 async: false,

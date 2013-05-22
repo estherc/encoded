@@ -12,7 +12,22 @@
             "comment": "Assay Type",
             "title": "Assay Type",
             "type": "string",
-            "enum" : [],
+            "enum" : [
+                "DNase-seq",
+                "FAIRE-seq",
+                "CLIP-seq",
+                "RIP-seq",
+                "RAMPAGE",
+                "Shotgun Bisulfite-seq",
+                "RRBS",
+                "MRE-seq",
+                "DNA-PET",
+                "RNA-PET",
+                "ChIA-PET",
+                "RNA-seq",
+                "ChIP-seq",
+                "MethylArray"
+            ],
             "required": true
         },
         "lab_uuid": {
@@ -35,7 +50,7 @@
             "enum" : [],
             "required": true
         },
-        "description": {
+        "dataset_description": {
             "default": "",
             "description": "A plain text description of the biosample",
             "title": "Description",

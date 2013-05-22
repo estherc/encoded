@@ -25,7 +25,7 @@
             "required": true,
             "enum" : []
         },
-        "notes": {
+        "note": {
             "description": "User Notes",
             "title": "Notes",
             "type": "textarea"
