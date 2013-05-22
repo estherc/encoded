@@ -7,6 +7,11 @@ from .storage import (
     CurrentStatement,
 )
 
+# temp code for before conference
+biosample_count = 0
+experiment_count = 0
+antibody_count = 0
+
 URL = 'http://localhost:9200'
 DOCTYPE = 'basic'
 es = ElasticSearch(URL)
@@ -44,12 +49,24 @@ def generateAccession(context, request):
 
     item_type = request.get('HTTP_REFERER')
     item = item_type.split('/')
-    if item[2] == 'biosamples':
-        return 'ENCBS000EAA'
-    elif item[2] == 'biosamples':
-        return 'ENCSR000EAA'
-    elif item[2] == 'antibodies':
-        return 'ENCAB000EAA'
+    alphabets = map(chr, range(65, 91))
+    accession = ''
+    if item[3] == 'biosamples':
+        biosample_prefix = 'ENCBS000EA'
+        accession = biosample_prefix + alphabets[biosample_count]
+        global biosample_count
+        biosample_count = biosample_count + 1
+    elif item[3] == 'experiments':
+        experiment_prefix = 'ENCSR000KA'
+        accession = experiment_prefix + alphabets[experiment_count]
+        global experiment_count
+        experiment_count = experiment_count + 1
+    elif item[3] == 'antibodies':
+        antibody_prefix = 'ENCBS000BA'
+        accession = antibody_prefix + alphabets[antibody_count]
+        global antibody_count
+        antibody_count = antibody_count + 1
+    return accession
 
 
 @view_config(name='get_data', context=Root, subpath_segments=0, request_method='GET')

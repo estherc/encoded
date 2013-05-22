@@ -126,7 +126,7 @@ function antibodies(exports, $, _, base, table_sorter, table_filter, home_templa
             });
             setTimeout(function() {
                 var lotId = document.getElementsByName("antibody_lot_id")[0].id;
-                $("#" + lotId).chosen(); 
+                $("#" + lotId).chosen();
                 $.ajax({
                     async: false,
                     url: "/get_data",
