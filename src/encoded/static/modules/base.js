@@ -355,6 +355,7 @@ function base(exports, $, _, Backbone, HAL, assert, modal_template) {
                 $("#table-count").removeClass("label-warning").removeClass("spinner-warning").addClass("label-invert");
                 $(".table-filter").removeAttr("disabled");
                 $("#total-records").removeClass("hide");
+                $(".btn.btn-primary").removeAttr("disabled");
                 $table.table_sorter().table_filter();
 
             }, this));
