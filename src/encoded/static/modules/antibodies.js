@@ -125,49 +125,6 @@ function antibodies(exports, $, _, base, table_sorter, table_filter, home_templa
                 onSubmitValid: _.bind(this.send, this)
             });
             setTimeout(function() {
-                var lotId = document.getElementsByName("antibody_lot_id")[0].id;
-                $("#" + lotId).chosen();
-                $.ajax({
-                    async: false,
-                    url: "/get_data",
-                    dataType: "json",
-                    data: {collection: 'antibody_lots', column: 'lot'},
-                    success:  function(lots) {
-                        _.each(lots, function(value, key) {
-                            if (value != 'Unknown') {
-                                $("#" + lotId).append('<option value = ' + key + '>' + value + '</option>');
-                            }
-                        });
-                   }
-                });
-                $("#"+ lotId).trigger('liszt:updated');
-                var productId = document.getElementsByName("antibody_product_id")[0].id;
-                $("#" + productId).chosen();
-                $.ajax({
-                    async: false,
-                    url: "/get_data",
-                    dataType: "json",
-                    data: {collection: 'antibody_lots', column: 'product'},
-                    success:  function(products) {
-                        _.each(products, function(value, key) {
-                            $("#" + productId).append('<option value = ' + key + '>' + value + '</option>');
-                        });
-                   }
-                });
-                $("#"+ productId).trigger('liszt:updated');
-                var targetId = document.getElementsByName("target_uuid")[0].id;
-                $("#" + targetId).chosen();
-                $.ajax({
-                    async: false,
-                    url: "/get_data",
-                    dataType: "json",
-                    data: {collection: 'target'},
-                    success:  function(targets) {
-                        _.each(targets, function(value, key) {
-                            $("#" + targetId).append('<option value = ' + value + '>' + value + '</option>');
-                        });
-                   }
-                });
                 $("#"+ targetId).trigger('liszt:updated');
                 var speciesId = document.getElementsByName("host_organism")[0].id;
                 $("#" + speciesId).chosen();
