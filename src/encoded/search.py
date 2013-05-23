@@ -53,18 +53,18 @@ def generateAccession(context, request):
     accession = ''
     if item[3] == 'biosamples':
         biosample_prefix = 'ENCBS000EA'
-        accession = biosample_prefix + alphabets[biosample_count]
         global biosample_count
+        accession = biosample_prefix + alphabets[biosample_count]
         biosample_count = biosample_count + 1
     elif item[3] == 'experiments':
         experiment_prefix = 'ENCSR000KA'
-        accession = experiment_prefix + alphabets[experiment_count]
         global experiment_count
+        accession = experiment_prefix + alphabets[experiment_count]
         experiment_count = experiment_count + 1
     elif item[3] == 'antibodies':
         antibody_prefix = 'ENCBS000BA'
-        accession = antibody_prefix + alphabets[antibody_count]
         global antibody_count
+        accession = antibody_prefix + alphabets[antibody_count]
         antibody_count = antibody_count + 1
     return accession
 
