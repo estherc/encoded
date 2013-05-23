@@ -348,6 +348,15 @@ $footerBorder:              #0f2a42 !default;
 	padding-top: 75px;
 }
 
+header .controls {
+    position: relative;
+    height: 90px;
+    button { 
+        position: absolute;
+        bottom: 10px;
+        right: 0;
+    }
+}
 
 // top padding for small screens
 @media (max-width: 979px) {
