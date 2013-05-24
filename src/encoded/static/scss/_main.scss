@@ -217,9 +217,11 @@ table thead tr th button {
   @include gradient-vertical(lighten($navbarInverseLinkBackgroundHover, 8%), lighten($navbarInverseLinkBackgroundHover, 5%));
 }
 
+/* Needs background setting first
 .dropdown-menu li > a {
 	color: #fff;
 }
+*/
 
 
 $subNavHeight: 30px;
@@ -391,6 +393,13 @@ header .controls {
 a[href^="http"]:empty:after {
 	content: none;
 }
+
+// do not use external link icon in these cases...
+// downloads
+a[href^="http://encodedcc.sdsc.edu/warehouse/"]:after {
+	content: none !important;
+}
+
 
 
 @include sticky-footer($footerHeight, $footerTopBorderHeight, "#layout", "#layout-footer", "#page-footer");
