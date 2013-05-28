@@ -140,6 +140,7 @@ def main(global_config, **settings):
     config.include('.predicates')
     config.include('.contentbase')
     config.include('.views')
+    config.include('.search')
     config.include('.edw_key')
     config.include('.persona')
     config.include('pyramid_multiauth')
