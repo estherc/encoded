@@ -20,6 +20,7 @@ requires = [
     'xlutils',
     'zope.sqlalchemy',
     'PyBrowserID',
+    'pyelasticsearch',
     ]
 
 tests_require = [
