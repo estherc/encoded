@@ -10,6 +10,7 @@ from pyramid.httpexceptions import (
     HTTPForbidden,
     HTTPInternalServerError,
     HTTPNotFound,
+    HTTPNotModified,
 )
 from pyramid.interfaces import (
     PHASE1_CONFIG,
@@ -22,15 +23,20 @@ from pyramid.security import (
     Authenticated,
     Deny,
     Everyone,
+    authenticated_userid,
     has_permission,
 )
 from pyramid.threadlocal import (
     manager,
 )
 from pyramid.view import view_config
+from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import FlushError
-from urllib import unquote
+from urllib import (
+    quote,
+    unquote,
+)
 from uuid import (
     UUID,
     uuid4,
@@ -43,6 +49,7 @@ from .storage import (
     Resource,
     Key,
     Link,
+    TransactionRecord,
 )
 from .validation import ValidationFailure
 LOCATION_ROOT = __name__ + ':location_root'
@@ -585,7 +592,43 @@ class Collection(object):
         return properties
 
 
-@view_config(context=Collection, permission='list', request_method='GET')
+def etag_conditional(view_callable):
+    """ ETag conditional GET support
+
+    Returns 304 Not Modified when the last transaction id, server process id,
+    format and userid all match.
+
+    This might not be strictly correct due to MVCC visibility on postgres.
+    Perhaps use ``select txid_current_snapshot();`` instead there.
+    """
+    def wrapped(context, request):
+        if len(manager.stack) != 1:
+            return view_callable(context, request)
+        format = request.environ.get('encoded.format', 'html')
+        if format == 'html':
+            last_tid = None
+        else:
+            session = DBSession()
+            last_tid = session.query(func.max(TransactionRecord.order)).scalar()
+        processid = request.registry['encoded.processid']
+        userid = authenticated_userid(request) or ''
+        etag = u'%s;%s;%s;%s' % (last_tid, processid, format, userid)
+        etag = quote(etag.encode('utf-8'), ';:@')
+        if etag in request.if_none_match:
+            raise HTTPNotModified()
+        result = view_callable(context, request)
+        request.response.etag = etag
+        cache_control = request.response.cache_control
+        cache_control.private = True
+        cache_control.max_age = 0
+        cache_control.must_revalidate = True
+        return result
+
+    return wrapped
+
+
+@view_config(context=Collection, permission='list', request_method='GET',
+             decorator=etag_conditional)
 def collection_list(context, request):
     return item_view(context, request)
 
@@ -624,7 +667,8 @@ def traversal_security(event):
             raise HTTPForbidden(msg, result=result)
 
 
-@view_config(context=Item, permission='view', request_method='GET')
+@view_config(context=Item, permission='view', request_method='GET',
+             decorator=etag_conditional)
 def item_view(context, request):
     if no_body_needed(request):
         return {}

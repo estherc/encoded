@@ -115,7 +115,13 @@ def main(global_config, **settings):
     """
 
     secret = settings['multiauth.policy.authtkt.secret']
-    session_factory = UnencryptedCookieSessionFactoryConfig(secret)
+    # auth_tkt has no timeout set
+    # cookie will still expire at browser close
+    timeout = 60 * 60 * 24
+    session_factory = UnencryptedCookieSessionFactoryConfig(
+        secret=secret,
+        timeout=timeout,
+    )
 
     config = Configurator(
         settings=settings,
@@ -137,7 +143,6 @@ def main(global_config, **settings):
     config.include('.edw_key')
     config.include('.persona')
     config.include('pyramid_multiauth')
-    config.include('.search')
 
     config.include(static_resources)
 

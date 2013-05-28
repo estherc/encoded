@@ -376,6 +376,7 @@ function base(exports, $, _, Backbone, HAL, assert, error_template, modal_templa
                 $(".table-filter").removeAttr("disabled");
                 $("#total-records").removeClass("hide");
                 $(".btn.btn-primary").removeAttr("disabled");
+                $table.addClass('fully-loaded');
                 $table.table_sorter().table_filter();
 
             }, this));
