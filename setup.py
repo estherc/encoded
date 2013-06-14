@@ -20,6 +20,7 @@ requires = [
     'xlutils',
     'zope.sqlalchemy',
     'PyBrowserID',
+    'pyelasticsearch'
     ]
 
 tests_require = [
@@ -49,6 +50,7 @@ setup(
     entry_points='''
         [console_scripts]
         extract_test_data = encoded.commands.extract_test_data:main
+        es_index_data = encoded.commands.es_index_data:main
 
         [paste.app_factory]
         main = encoded:main
