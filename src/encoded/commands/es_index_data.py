@@ -7,7 +7,7 @@ es = ElasticSearch(ES_URL)
 
 COLLECTION_URL = ['antibodies', 'biosamples', 'experiments']
 antibodies_mapping = {'basic': {'properties': {'_embedded': {'type': 'nested', 'properties': {'antibody_lot': {'type': 'nested', 'properties': {'source': {'type': 'nested'}}}, 'target': {'type': 'nested', 'properties': {'lab': {'type': 'nested'}, 'award': {'type': 'nested'}, 'submitter': {'type': 'nested'}, 'organism': {'type': 'nested'}, 'date_created': {'type': 'string', 'index': 'not_analyzed'}, 'geneid_dbxref_list': {'type': 'string', 'index': 'not_analyzed'}}}}}}}}
-biosamples_mapping = {'basic': {'properties': {'_embedded': {'type': 'nested', 'properties': {'lot_id': {'type': 'string'}, 'donor': {'type': 'nested'}, 'lab': {'type': 'nested'}, 'award': {'type': 'nested'}, 'submitter': {'type': 'nested'}, 'source': {'type': 'nested'}, 'treatments': {'type': 'nested'}, 'constructs': {'type': 'nested'}}}}}}
+biosamples_mapping = {'basic': {'properties': {'lot_id': {'type': 'string'}, '_embedded': {'type': 'nested', 'properties': {'donor': {'type': 'nested'}, 'lab': {'type': 'nested'}, 'award': {'type': 'nested'}, 'submitter': {'type': 'nested'}, 'source': {'type': 'nested'}, 'treatments': {'type': 'nested'}, 'constructs': {'type': 'nested'}}}}}}
 experiments_mapping = {'basic': {'properties': {'_embedded': {'type': 'nested', 'properties': {'replicates': {'type': 'nested'}}}}}}
 
 
@@ -25,16 +25,20 @@ def index_antibodies(url, testapp, items):
         links = item_json.json['_links']
         resources = item_json.json['_embedded']['resources']
         data = {}
+        embed_antibody = {}
+        embed_target = {}
         for link in links:
             if link == 'antibody_lot':
                 data['antibody_lot'] = resources[links[link].get('href')]
-                data['antibody_lot']['source'] = resources[resources[links[link].get('href')]['_links']['source'].get('href')]
+                embed_antibody['source'] = resources[resources[links[link].get('href')]['_links']['source'].get('href')]
             elif link == 'target':
                 data['target'] = item_json.json['_embedded']['resources'][links[link].get('href')]
-                data['target']['lab'] = resources[resources[links[link].get('href')]['_links']['lab'].get('href')]
-                data['target']['award'] = resources[resources[links[link].get('href')]['_links']['award'].get('href')]
-                data['target']['organism'] = resources[resources[links[link].get('href')]['_links']['organism'].get('href')]
-                data['target']['submitter'] = resources[resources[links[link].get('href')]['_links']['submitter'].get('href')]
+                embed_target['lab'] = resources[resources[links[link].get('href')]['_links']['lab'].get('href')]
+                embed_target['award'] = resources[resources[links[link].get('href')]['_links']['award'].get('href')]
+                embed_target['organism'] = resources[resources[links[link].get('href')]['_links']['organism'].get('href')]
+                embed_target['submitter'] = resources[resources[links[link].get('href')]['_links']['submitter'].get('href')]
+        data['antibody_lot']['_embedded'] = embed_antibody
+        data['target']['_embedded'] = embed_target
         antibody['_embedded'] = data
         es.index(url, 'basic', antibody, id)
     es.refresh(url)
