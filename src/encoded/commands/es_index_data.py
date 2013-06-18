@@ -6,9 +6,9 @@ DOCTYPE = 'basic'
 es = ElasticSearch(ES_URL)
 
 COLLECTION_URL = ['antibodies', 'biosamples', 'experiments']
-antibodies_mapping = {'basic': {'properties': {'antibody_lot': {'type': 'nested', 'properties': {'source': {'type': 'nested'}}}, 'target': {'type': 'nested', 'properties': {'lab': {'type': 'nested'}, 'award': {'type': 'nested'}, 'submitter': {'type': 'nested'}, 'organism': {'type': 'nested'}, 'date_created': {'type': 'string', 'index': 'not_analyzed'}, 'geneid_dbxref_list': {'type': 'string', 'index': 'not_analyzed'}}}}}}
-biosamples_mapping = {'basic': {'properties': {'lot_id': {'type': 'string'}, 'donor': {'type': 'nested'}, 'lab': {'type': 'nested'}, 'award': {'type': 'nested'}, 'submitter': {'type': 'nested'}, 'source': {'type': 'nested'}, 'treatments': {'type': 'nested'}, 'constructs': {'type': 'nested'}}}}
-experiments_mapping = {'basic': {'properties': {'replicates': {'type': 'nested'}}}}
+antibodies_mapping = {'basic': {'properties': {'_embedded': {'type': 'nested', 'properties': {'antibody_lot': {'type': 'nested', 'properties': {'source': {'type': 'nested'}}}, 'target': {'type': 'nested', 'properties': {'lab': {'type': 'nested'}, 'award': {'type': 'nested'}, 'submitter': {'type': 'nested'}, 'organism': {'type': 'nested'}, 'date_created': {'type': 'string', 'index': 'not_analyzed'}, 'geneid_dbxref_list': {'type': 'string', 'index': 'not_analyzed'}}}}}}}}
+biosamples_mapping = {'basic': {'properties': {'_embedded': {'type': 'nested', 'properties': {'lot_id': {'type': 'string'}, 'donor': {'type': 'nested'}, 'lab': {'type': 'nested'}, 'award': {'type': 'nested'}, 'submitter': {'type': 'nested'}, 'source': {'type': 'nested'}, 'treatments': {'type': 'nested'}, 'constructs': {'type': 'nested'}}}}}}
+experiments_mapping = {'basic': {'properties': {'_embedded': {'type': 'nested', 'properties': {'replicates': {'type': 'nested'}}}}}}
 
 
 def index_antibodies(url, testapp, items):
@@ -24,16 +24,18 @@ def index_antibodies(url, testapp, items):
         del(antibody['_embedded'])
         links = item_json.json['_links']
         resources = item_json.json['_embedded']['resources']
+        data = {}
         for link in links:
             if link == 'antibody_lot':
-                antibody['antibody_lot'] = resources[links[link].get('href')]
-                antibody['antibody_lot']['source'] = resources[resources[links[link].get('href')]['_links']['source'].get('href')]
+                data['antibody_lot'] = resources[links[link].get('href')]
+                data['antibody_lot']['source'] = resources[resources[links[link].get('href')]['_links']['source'].get('href')]
             elif link == 'target':
-                antibody['target'] = item_json.json['_embedded']['resources'][links[link].get('href')]
-                antibody['target']['lab'] = resources[resources[links[link].get('href')]['_links']['lab'].get('href')]
-                antibody['target']['award'] = resources[resources[links[link].get('href')]['_links']['award'].get('href')]
-                antibody['target']['organism'] = resources[resources[links[link].get('href')]['_links']['organism'].get('href')]
-                antibody['target']['submitter'] = resources[resources[links[link].get('href')]['_links']['submitter'].get('href')]
+                data['target'] = item_json.json['_embedded']['resources'][links[link].get('href')]
+                data['target']['lab'] = resources[resources[links[link].get('href')]['_links']['lab'].get('href')]
+                data['target']['award'] = resources[resources[links[link].get('href')]['_links']['award'].get('href')]
+                data['target']['organism'] = resources[resources[links[link].get('href')]['_links']['organism'].get('href')]
+                data['target']['submitter'] = resources[resources[links[link].get('href')]['_links']['submitter'].get('href')]
+        antibody['_embedded'] = data
         es.index(url, 'basic', antibody, id)
     es.refresh(url)
 
@@ -51,24 +53,26 @@ def index_biosamples(url, testapp, items):
         del(biosample['_embedded'])
         links = item_json.json['_links']
         resources = item_json.json['_embedded']['resources']
+        data = {}
         for link in links:
             if link == 'treatments' and len(links[link]):
                 treatments = []
                 for treatment in links[link]:
                     treatments.append(resources[treatment.get('href')])
-                biosample['treatments'] = list()
-                biosample['treatments'].append(treatments)
+                data['treatments'] = list()
+                data['treatments'].append(treatments)
             elif link == 'constructs' and len(links[link]):
                 constructs = []
                 for construct in links[link]:
                     constructs.append(resources[construct.get('href')])
-                biosample['constructs'] = list()
-                biosample['constructs'].append(constructs)
-        biosample['lab'] = resources[biosample['_links']['lab'].get('href')]
-        biosample['donor'] = resources[biosample['_links']['donor'].get('href')]
-        biosample['award'] = resources[biosample['_links']['award'].get('href')]
-        biosample['source'] = resources[biosample['_links']['source'].get('href')]
-        biosample['submitter'] = resources[biosample['_links']['submitter'].get('href')]
+                data['constructs'] = list()
+                data['constructs'].append(constructs)
+        data['lab'] = resources[biosample['_links']['lab'].get('href')]
+        data['donor'] = resources[biosample['_links']['donor'].get('href')]
+        data['award'] = resources[biosample['_links']['award'].get('href')]
+        data['source'] = resources[biosample['_links']['source'].get('href')]
+        data['submitter'] = resources[biosample['_links']['submitter'].get('href')]
+        biosample['_embedded'] = data
         es.index(url, 'basic', biosample, id)
     es.refresh(url)
 
@@ -85,13 +89,15 @@ def index_experiments(url, testapp, items):
         experiment = item_json.json
         del(experiment['_embedded'])
         links = item_json.json['_links']
+        data = {}
         for link in links:
             if link == 'replicates' and len(links[link]):
                 replicates = []
                 for replicate in links[link]:
                     replicates.append(item_json.json['_embedded']['resources'][replicate.get('href')])
-                experiment['replicates'] = list()
-                experiment['replicates'].append(replicates)
+                data['replicates'] = list()
+                data['replicates'].append(replicates)
+        experiment['_embedded'] = data
         es.index(url, 'basic', experiment, id)
     es.refresh(url)
 
