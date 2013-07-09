@@ -9,7 +9,7 @@ es = ElasticSearch(ES_URL)
 basic_mapping = {'basic': {}}
 targets_mapping = {'basic': {'properties': {'geneid_dbxref_list': {'type': 'string', 'index': 'not_analyzed'}, 'date_created': {'type': 'string', 'index': 'not_analyzed'}}}}
 biosamples_mapping = {'basic': {'properties': {'lot_id': {'type': 'string'}, 'donor': {'type': 'nested'}, 'lab': {'type': 'nested'}, 'award': {'type': 'nested'}, 'submitter': {'type': 'nested'}, 'source': {'type': 'nested'}, 'treatments': {'type': 'nested'}, 'constructs': {'type': 'nested'}}}}
-experiments_mapping = {'basic': {'properties': {'replicates': {'type': 'nested'}}}}
+experiments_mapping = {'basic': {'properties': {'replicates': {'type': 'nested', 'properties': {'library id (sanity)': {'type': 'string'}}}}}}
 libraries_mapping = {'basic': {'properties': {'size_range': {'type': 'string'}}}}
 replicates_mapping = {'basic': {'properties': {'library': {'properties': {'size_range': {'type': 'string'}}}}}}
 antibodies_mapping = {'basic': {'properties': {'target': {'properties': {'geneid_dbxref_list': {'type': 'string', 'index': 'not_analyzed'}, 'date_created': {'type': 'string', 'index': 'not_analyzed'}}}}}}
@@ -90,7 +90,7 @@ def main():
                                 sub_index = COLLECTION_URL.get(str(list_link.get('href'))[:-36])[0]
                                 sub_document = es.get(sub_index, DOCTYPE, id)
                                 data_items.append(sub_document['_source'])
-                        document[link] = data_items
+                            document[link] = data_items
                     es.index(index, DOCTYPE, document, document_id)
             else:
                 es.index(index, DOCTYPE, document, document_id)
