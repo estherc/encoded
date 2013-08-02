@@ -49,6 +49,7 @@ setup(
     entry_points='''
         [console_scripts]
         extract_test_data = encoded.commands.extract_test_data:main
+        read_edw_fileinfo = encoded.commands.read_edw_fileinfo:main
 
         [paste.app_factory]
         main = encoded:main
