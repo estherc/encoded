@@ -54,7 +54,6 @@ def import_edw_fileinfo(input_file):
     with open(input_file, 'rb') as f:
         reader = DictReader(f, delimiter='\t')
         for row in reader:
-            print row
             test_app.post_json(url, row)
 
 def read_edw_fileinfo(count):
