@@ -21,34 +21,41 @@ def make_app():
     return test_app
 
 def make_edw_db():
+    # Get configuration
+    import ConfigParser
+    config = ConfigParser.ConfigParser()
+    config.read('edw.cfg')
+
+    # TODO: Possible command-line option to change to 'dev' settings
+    site = 'production'
+    engine = config.get(site, 'engine');
+    host = config.get(site, 'host');
+    db = config.get(site, 'db');
+    user = config.get(site, 'user');
+    password = config.get(site, 'password');
+
 
     # Create db engine (using configured settings when available)
-    edw_host = 'encodedcc.sdsc.edu'  # settings.get('edw_host')
-    edw_db = 'encodeDataWarehouse'   # settings.get('edw_db')
-    edw_user = 'hguser'              # settings.get('edw_user');
-    edw_pass = 'hguserstuff'         # settings.get('edw_pass');
-    edw_url = 'mysql://%s:%s@%s/%s' % (edw_user, edw_pass, edw_host, edw_db)
-    #print('Creating sqlalchemy engine for: ' + edw_url, end='')
-    print >>sys.stderr, edw_url
-    print >>sys.stderr, '...'
-    edw_engine = create_engine(edw_url)
-    print >>sys.stderr, 'success'
-    return edw_engine
+    print >>sys.stderr, \
+        'Connecting to', '%s://%s/%s' % (engine, host, db)
+    edw_db = create_engine('%s://%s:%s@%s/%s' % 
+        (engine, user, password, host, db))
+    return edw_db
 
 def import_edw_fileinfo(input_file):
-    print 'importing file'
-    test_app = make_app()
+    print >>sys.stderr, 'Importing files from ' + input_file
 
-    new_file = {
-        'file_format': 'bam',
-        'md5sum': '5',
-        'output_type': 'alignments',
-        'replicate': '1',
-        'assembly': 'hg19',
-        'download_path': '/tmp/foo'
-    }
+    from csv import DictReader
+    import json
+
+    test_app = make_app()
     url = 'http://localhost:5432/files/'
-    test_app.post_json(url, new_file)
+    #url = 'http://submit-dev.encodedcc.org/files/'
+    with open(input_file, 'rb') as f:
+        reader = DictReader(f, delimiter='\t')
+        for row in reader:
+            print row
+            test_app.post_json(url, row)
 
 def read_edw_fileinfo(count):
 
