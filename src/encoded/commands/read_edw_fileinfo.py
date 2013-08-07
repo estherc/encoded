@@ -66,11 +66,6 @@ def import_edw_fileinfo(input_file):
     import json
 
     test_app = make_app()
-    #url = 'http://localhost:5432/files/'
-    # Seth's dev sys
-    #url = 'http://184.169.162.173/files/'
-    #url = 'http://submit-dev.encodedcc.org/files/'
-    #url = 'http://' + app_host + '/files/'
     url = '/files/'
     print >>sys.stderr, 'Posting to ' + url
     with open(input_file, 'rb') as f:
