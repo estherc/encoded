@@ -15,9 +15,10 @@ requires = [
     'pyramid',
     'pyramid_multiauth',
     'pyramid_tm',
+    'rfc3987',
     'setuptools',
+    'strict_rfc3339',
     'xlrd',
-    'xlutils',
     'zope.sqlalchemy',
     'PyBrowserID',
     ]

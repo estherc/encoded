@@ -37,12 +37,6 @@ class User(Collection):
     ]
 
     class Item(Collection.Item):
-        links = {
-            'labs': [
-                {'$value': '/labs/{lab_uuid}', '$templated': True,
-                 '$repeat': 'lab_uuid lab_uuids'}
-            ]
-        }
         keys = ['email']
         unique_key = 'user:email'
 
@@ -64,13 +58,17 @@ def user_details_view(context, request):
 def user_basic_view(context, request):
     properties = item_view(context, request)
     filtered = {}
-    for key in ['labs', 'first_name', 'last_name']:
-        filtered[key] = properties[key]
+    for key in ['lab', 'first_name', 'last_name']:
+        try:
+            filtered[key] = properties[key]
+        except KeyError:
+            pass
     return filtered
 
 
 @view_config(context=Root, name='current-user', request_method='GET')
 def current_user(request):
+    request.environ['encoded.canonical_redirect'] = False
     for principal in effective_principals(request):
         if principal.startswith('userid:'):
             break
