@@ -2,9 +2,10 @@
 
 import sys
 import logging
-from csv import DictReader, DictWriter
-import ConfigParser
+import datetime
 import argparse
+import ConfigParser
+from csv import DictReader, DictWriter
 
 from pyramid import paster
 from webtest import TestApp
@@ -12,9 +13,9 @@ from sqlalchemy import MetaData, create_engine, select
 
 DEFAULT_COUNT = 10  # Number of files to show by default
 
-DATE_VALIDATED_FIELD = 'date_passed_validation',
+# NOTE: ordering of fields currently needs to match query order below
 FILE_INFO_FIELDS = ['file_accession',
-                    #DATE_VALIDATED_FIELD,
+                    'date_passed_validation',
                     'output_type',
                     'file_format',
                     'experiment_accession',
@@ -113,7 +114,7 @@ def read_edw_fileinfo(count, data_host):
     # List files newest first
     # NOTE: ordering must mirror FILE_INFO_FIELDS
     query = select([v.c.licensePlate.label('file_accession'),
-                    #f.c.endUploadTime.label(DATE_VALIDATED_FIELD),
+                    f.c.endUploadTime.label('date_passed_validation'),
                     v.c.outputType.label('output_type'),
                     v.c.format.label('file_format'),
                     v.c.experiment.label('experiment_accession'),
@@ -131,10 +132,19 @@ def read_edw_fileinfo(count, data_host):
         order_by(f.c.endUploadTime.desc()).\
         limit(count)
     results = conn.execute(query)
-
-    print '\t'.join(FILE_INFO_FIELDS)
+    writer = DictWriter(sys.stdout, fieldnames=query.columns.keys(),
+                delimiter='\t', extrasaction='ignore')
     for row in results:
-        print '\t'.join(row)
+        row_dict = dict(row)
+        valid_time = row_dict['date_passed_validation']
+        row_dict['date_passed_validation'] = datetime.datetime.fromtimestamp(
+                    valid_time).isoformat()
+        writer.writerow(row_dict)
+    results.close()
+
+    #print '\t'.join(FILE_INFO_FIELDS)
+    #for row in results:
+        #print '\t'.join(row)
 
 
 def main():
