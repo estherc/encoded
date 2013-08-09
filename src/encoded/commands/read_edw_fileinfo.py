@@ -133,18 +133,14 @@ def read_edw_fileinfo(count, data_host):
         limit(count)
     results = conn.execute(query)
     writer = DictWriter(sys.stdout, fieldnames=query.columns.keys(),
-                delimiter='\t', extrasaction='ignore')
+                        delimiter='\t', extrasaction='ignore')
     for row in results:
         row_dict = dict(row)
         valid_time = row_dict['date_passed_validation']
         row_dict['date_passed_validation'] = datetime.datetime.fromtimestamp(
-                    valid_time).isoformat()
+            valid_time).isoformat()
         writer.writerow(row_dict)
     results.close()
-
-    #print '\t'.join(FILE_INFO_FIELDS)
-    #for row in results:
-        #print '\t'.join(row)
 
 
 def main():
