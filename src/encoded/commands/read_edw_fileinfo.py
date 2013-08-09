@@ -12,7 +12,9 @@ from sqlalchemy import MetaData, create_engine, select
 
 DEFAULT_COUNT = 10  # Number of files to show by default
 
+DATE_VALIDATED_FIELD = 'date_passed_validation',
 FILE_INFO_FIELDS = ['file_accession',
+                    #DATE_VALIDATED_FIELD,
                     'output_type',
                     'file_format',
                     'experiment_accession',
@@ -73,7 +75,7 @@ def import_edw_fileinfo(input_file):
     response = test_app.get(url)
 
     # Output files
-    fields = (list(FILE_INFO_FIELDS))
+    fields = list(FILE_INFO_FIELDS)
     fields.append('@id')
     writer = DictWriter(sys.stdout, delimiter='\t', fieldnames=fields,
                         extrasaction='ignore')
@@ -86,7 +88,7 @@ def read_encoded_fileinfo(count):
     url = '/files/'
     #sys.stderr.write('Exporting file info from app')
     response = test_app.get(url)
-    print response.json
+    sys.stdout.write(response.json)
 
 
 def read_edw_fileinfo(count, data_host):
@@ -110,17 +112,18 @@ def read_edw_fileinfo(count, data_host):
     # Get info for ENCODE 3 experiment files (those having ENCSR accession)
     # List files newest first
     # NOTE: ordering must mirror FILE_INFO_FIELDS
-    query = select([v.c.licensePlate,
-                    v.c.outputType,
-                    v.c.format,
-                    v.c.experiment,
-                    v.c.replicate,
-                    f.c.edwFileName,
-                    f.c.submitFileName,
-                    v.c.ucscDb,
-                    v.c.enrichedIn,
-                    f.c.md5,
-                    u.c.email]).\
+    query = select([v.c.licensePlate.label('file_accession'),
+                    #f.c.endUploadTime.label(DATE_VALIDATED_FIELD),
+                    v.c.outputType.label('output_type'),
+                    v.c.format.label('file_format'),
+                    v.c.experiment.label('experiment_accession'),
+                    v.c.replicate.label('replicate'),
+                    f.c.edwFileName.label('download_path'),
+                    f.c.submitFileName.label('submitted_file_name'),
+                    v.c.ucscDb.label('assembly'),
+                    v.c.enrichedIn.label('enriched'),
+                    f.c.md5.label('md5sum'),
+                    u.c.email.label('submitter_email')]).\
         where((v.c.experiment.like('ENCSR%')) &
               (v.c.fileId == f.c.id) &
               (s.c.id == f.c.submitId) &
